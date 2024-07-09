@@ -1,0 +1,3 @@
+src-tauri/database.db
+src-tauri/migrations/*
+src-tauri/src/schema.rs
