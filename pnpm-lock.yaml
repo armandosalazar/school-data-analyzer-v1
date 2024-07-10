@@ -32,6 +32,12 @@ dependencies:
   '@tauri-apps/api':
     specifier: ^1
     version: 1.6.0
+  primeicons:
+    specifier: ^7.0.0
+    version: 7.0.0
+  primeng:
+    specifier: ^17.18.3
+    version: 17.18.3(@angular/common@17.3.11)(@angular/core@17.3.11)(@angular/forms@17.3.11)(rxjs@7.8.1)(zone.js@0.14.7)
   rxjs:
     specifier: ~7.8.0
     version: 7.8.1
@@ -6106,6 +6112,27 @@ packages:
       picocolors: 1.0.1
       source-map-js: 1.2.0
     dev: true
+
+  /primeicons@7.0.0:
+    resolution: {integrity: sha512-jK3Et9UzwzTsd6tzl2RmwrVY/b8raJ3QZLzoDACj+oTJ0oX7L9Hy+XnVwgo4QVKlKpnP/Ur13SXV/pVh4LzaDw==}
+    dev: false
+
+  /primeng@17.18.3(@angular/common@17.3.11)(@angular/core@17.3.11)(@angular/forms@17.3.11)(rxjs@7.8.1)(zone.js@0.14.7):
+    resolution: {integrity: sha512-gbFo9cZF3E2ox8MkIPMp5CuqACMkJwgpjjNofzI2gh/9BKnAWB4Iao7mLKTlU46CtzHsmslQ9lU8OmmKG7LG1A==}
+    peerDependencies:
+      '@angular/common': ^17.0.0 || ^18.0.0
+      '@angular/core': ^17.0.0 || ^18.0.0
+      '@angular/forms': ^17.0.0 || ^18.0.0
+      rxjs: ^6.0.0 || ^7.8.1
+      zone.js: ~0.14.0
+    dependencies:
+      '@angular/common': 17.3.11(@angular/core@17.3.11)(rxjs@7.8.1)
+      '@angular/core': 17.3.11(rxjs@7.8.1)(zone.js@0.14.7)
+      '@angular/forms': 17.3.11(@angular/common@17.3.11)(@angular/core@17.3.11)(@angular/platform-browser@17.3.11)(rxjs@7.8.1)
+      rxjs: 7.8.1
+      tslib: 2.6.3
+      zone.js: 0.14.7
+    dev: false
 
   /proc-log@3.0.0:
     resolution: {integrity: sha512-++Vn7NS4Xf9NacaU9Xq3URUuqZETPsf8L4j5/ckhaRYsfPeRyzGw+iDjFhV/Jr3uNmTvvddEJFWh5R1gRgUH8A==}

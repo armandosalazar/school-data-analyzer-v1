@@ -2,21 +2,19 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { invoke } from '@tauri-apps/api/tauri';
+import { open } from '@tauri-apps/api/dialog';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet],
+  imports: [CommonModule, RouterOutlet, ButtonModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
 export class AppComponent {
-  greetingMessage = '';
-  onFileChange(event: Event): void {
-    const target = event.target as HTMLInputElement;
-    const file = target.files?.[0];
-    console.log(file);
-  }
+  // greetingMessage = '';
+  path: string = '';
 
   // greet(event: SubmitEvent, name: string): void {
   //   event.preventDefault();
@@ -27,10 +25,20 @@ export class AppComponent {
   //   });
   // }
 
-  greet(): void {
-    // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-    invoke<string>('greet', { name: 'Armando' }).then((text) => {
-      this.greetingMessage = text;
+  async openDatabase(): Promise<void> {
+    const selected = await open({
+      multiple: false,
+      filters: [
+        {
+          name: 'Data',
+          extensions: ['csv'],
+        },
+      ],
     });
+
+    this.path = selected?.toString() ?? '';
+    console.log(selected);
+
+    await invoke<void>('upload_file', { path: this.path });
   }
 }
