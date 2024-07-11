@@ -1,9 +1,11 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-mod schema;
-mod models;
-mod database;
 mod commands;
+mod database;
+mod models;
+mod repository;
+mod schema;
+
 
 fn main() {
     tauri::Builder::default()
