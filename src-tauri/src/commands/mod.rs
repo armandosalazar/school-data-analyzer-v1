@@ -1,30 +1,42 @@
 use polars::prelude::*;
 
 use crate::database;
-use crate::repository::{Repository, Student, StudentRepository};
+use crate::models::subject::Subject;
+use crate::repository::subject::SubjectRepository;
+use crate::repository::Repository;
 
 #[tauri::command]
 pub fn upload_file(path: &str) {
-    println!("@celled");
-    let df = CsvReadOptions::default()
-        .try_into_reader_with_file_path(Some(path.into()))
-        .unwrap()
-        .finish()
-        .unwrap();
-
+    let df: LazyFrame = LazyCsvReader::new(path).finish().unwrap();
     let mut conn = database::establish_connection();
-    let mut student_repository = StudentRepository::new(&mut conn);
-    let _ = student_repository.create(Student::new(
-        1,
-        "Armando Salazar".to_string(),
-        "type_".to_string(),
-        "status".to_string(),
-        "semester".to_string(),
-        "group".to_string(),
-        "turn".to_string(),
-        "level".to_string(),
-    ));
+    let mut subject_repository = SubjectRepository::new(&mut conn);
 
-    println!("{}", df);
-    println!("{}", path)
+    match create_subjects(&df, &mut subject_repository) {
+        Ok(_) => println!("Subjects created successfully"),
+        Err(e) => println!("Error creating subjects: {:?}", e),
+    }
+}
+
+#[allow(dead_code)]
+fn create_subjects(
+    df: &LazyFrame,
+    repository: &mut SubjectRepository,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let results: DataFrame = df
+        .clone()
+        .lazy()
+        .limit(5)
+        .select(&[col("clave"), col("nombre_duplicated_0").alias("nombre")])
+        .collect()?;
+
+    let columns = results.get_columns();
+
+    for i in 0..columns[0].len() {
+        let code = columns[0].get(i)?.to_string().replace("\"", "");
+        let name = columns[1].get(i)?.to_string().replace("\"", "");
+
+        let subject = Subject::new(name.as_str(), code.as_str());
+    }
+
+    Ok(())
 }
