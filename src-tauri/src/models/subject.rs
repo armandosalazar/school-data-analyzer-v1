@@ -1,15 +1,10 @@
-pub struct Subject<'a> {
-    id: &'a Option<u32>,
-    name: &'a str,
-    code: &'a str,
+pub struct Subject {
+    name: String,
+    code: String,
 }
 
-impl<'a> Subject<'a> {
-    pub fn new(name: &'a str, code: &'a str) -> Self {
-        Subject {
-            id: &None,
-            name,
-            code,
-        }
+impl Subject {
+    pub fn new(name: String, code: String) -> Self {
+        Subject { name, code }
     }
 }

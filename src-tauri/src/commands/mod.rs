@@ -1,3 +1,4 @@
+use diesel::IntoSql;
 use polars::prelude::*;
 
 use crate::database;
@@ -32,10 +33,10 @@ fn create_subjects(
     let columns = results.get_columns();
 
     for i in 0..columns[0].len() {
-        let code = columns[0].get(i)?.to_string().replace("\"", "");
-        let name = columns[1].get(i)?.to_string().replace("\"", "");
-
-        let subject = Subject::new(name.as_str(), code.as_str());
+        repository.create(Subject::new(
+            columns[1].get(i)?.to_string().replace("\"", ""),
+            columns[0].get(i)?.to_string().replace("\"", ""),
+        ));
     }
 
     Ok(())
