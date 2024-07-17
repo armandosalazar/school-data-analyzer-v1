@@ -1,12 +1,12 @@
 use diesel::prelude::*;
 
-#[derive(Insertable, Queryable)]
+#[derive(Insertable, Queryable, Identifiable)]
 #[diesel(table_name = crate::schema::teachers)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct Teacher {
-    id: Option<i32>,
-    payfoll: Option<i32>,
-    name: Option<String>,
+    pub id: Option<i32>,
+    pub payfoll: Option<i32>,
+    pub name: Option<String>,
 }
 
 impl Teacher {
