@@ -3,7 +3,7 @@ use polars::prelude::*;
 
 use crate::database;
 use crate::models::division::Division;
-// use crate::models::subject::Subject;
+use crate::models::subject::Subject;
 use crate::models::teacher::Teacher;
 use crate::repository::division::DivisionRepository;
 use crate::repository::subject::SubjectRepository;
@@ -106,13 +106,90 @@ fn create_subjects(
     df: &LazyFrame,
     repository: &mut SubjectRepository,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    use crate::schema::teachers::dsl::name;
-    use crate::schema::teachers::dsl::teachers;
+    // let names: Vec<_> = teachers
+    //     .filter(crate::schema::teachers::payfoll.eq(1194))
+    //     .or_filter(crate::schema::teachers::name.eq("GONZALEZ LOMELI CHRISTIAN"))
+    //     .select(id)
+    //     .load::<Option<i32>>(repository.conn)?;
+    let result = df
+        .clone()
+        .lazy()
+        .select(&[
+            col("clave"),
+            col("nombre_duplicated_0").alias("nombre"),
+            col("division"),
+            col("academia"),
+            col("nomina"),
+            col("nombre_duplicated_1").alias("nombre_maestro"),
+        ])
+        .group_by([col("clave"), col("nombre_maestro")])
+        .agg([
+            col("nombre").unique().first(),
+            col("division").unique().first(),
+            col("academia").unique().first(),
+            col("nomina").unique().first(),
+        ])
+        .sort(["clave"], Default::default())
+        .collect()?;
 
-    let names: Vec<_> = teachers
-        .select(name)
-        .load::<Option<String>>(repository.conn)?;
-    println!("{:?}", names);
+    for i in 0..result.height() {
+        let teacher_id: Option<i32> = crate::schema::teachers::dsl::teachers
+            .filter(
+                crate::schema::teachers::payfoll.eq(result
+                    .column("nomina")?
+                    .i32()?
+                    .get(i)
+                    .unwrap()),
+            )
+            .or_filter(
+                crate::schema::teachers::name.eq(result
+                    .column("nombre_maestro")?
+                    .str()?
+                    .get(i)
+                    .unwrap()),
+            )
+            .select(crate::schema::teachers::id)
+            .first::<Option<i32>>(repository.conn)?;
+
+        let division_id: Option<i32> = crate::schema::divisions::table
+            .filter(
+                crate::schema::divisions::code.eq(result
+                    .column("division")?
+                    .i32()?
+                    .get(i)
+                    .unwrap()),
+            )
+            .or_filter(
+                crate::schema::divisions::academy.eq(result
+                    .column("academia")?
+                    .str()?
+                    .get(i)
+                    .unwrap()),
+            )
+            .select(crate::schema::divisions::id)
+            .first::<Option<i32>>(repository.conn)?;
+
+        match repository.create(Subject::new(
+            teacher_id.unwrap(),
+            division_id.unwrap(),
+            result.column("clave")?.str()?.get(i).unwrap().to_string(),
+            result.column("nombre")?.str()?.get(i).unwrap().to_string(),
+        )) {
+            Ok(_) => continue,
+            Err(e) => println!("Error creating subject: {:?}", e),
+        }
+    }
+
+    // let teacher_id: Option<i32> = crate::schema::teachers::dsl::teachers
+    //     .filter(crate::schema::teachers::payfoll.eq(1194))
+    //     .or_filter(crate::schema::teachers::name.eq("GONZALEZ LOMELI CHRISTIAN"))
+    //     .select(crate::schema::teachers::id)
+    //     .first::<Option<i32>>(repository.conn)?;
+
+    // let division_id: Option<i32> = crate::schema::divisions::table
+    //     .filter(crate::schema::divisions::academy.eq("Matemáticas"))
+    //     .select(crate::schema::divisions::id)
+    //     .first::<Option<i32>>(repository.conn)?;
 
     // match repository.create(Subject::new(
     //     1,
