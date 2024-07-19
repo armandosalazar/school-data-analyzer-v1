@@ -16,6 +16,10 @@ impl<'a> SubjectRepository<'a> {
 
 impl Repository<Subject> for SubjectRepository<'_> {
     fn create(&mut self, entity: Subject) -> Result<Subject, Box<dyn std::error::Error>> {
-        Ok(entity)
+        let subject = diesel::insert_into(crate::schema::subjects::table)
+            .values(&entity)
+            .get_result(self.conn)?;
+
+        Ok(subject)
     }
 }
