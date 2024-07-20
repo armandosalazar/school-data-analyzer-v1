@@ -1,8 +1,8 @@
-<p-button
-  label="Upload"
-  icon="pi pi-upload"
-  [rounded]="true"
-  (onClick)="openDatabase()"
-/>
-<p>{{ path }}</p>
-<p-button label="Analyse and Clean" [rounded]="true" />
+<div class="flex flex-1">
+  <div class="w-72 h-screen">
+    <p-panelMenu [model]="items" styleClass="w-full md:w-20rem" />
+  </div>
+  <div class="w-full">
+    <router-outlet></router-outlet>
+  </div>
+</div>
