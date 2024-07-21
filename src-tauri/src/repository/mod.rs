@@ -3,6 +3,7 @@ pub mod subject;
 pub mod teacher;
 
 pub trait Repository<T> {
+    fn find_all(&mut self) -> Result<Vec<T>, Box<dyn std::error::Error>>;
     // fn read_all(&mut self) -> T;
     // fn read(&mut self, id: i32) -> T;
     fn create(&mut self, entity: T) -> Result<T, Box<dyn std::error::Error>>;

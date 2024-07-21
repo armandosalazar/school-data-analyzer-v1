@@ -14,6 +14,12 @@ impl<'a> TeacherRepository<'a> {
 }
 
 impl Repository<Teacher> for TeacherRepository<'_> {
+    fn find_all(&mut self) -> Result<Vec<Teacher>, Box<dyn std::error::Error>> {
+        let teachers = crate::schema::teachers::table.load::<Teacher>(self.conn)?;
+
+        Ok(teachers)
+    }
+
     fn create(&mut self, entity: Teacher) -> Result<Teacher, Box<dyn std::error::Error>> {
         let teacher = diesel::insert_into(crate::schema::teachers::table)
             .values(&entity)

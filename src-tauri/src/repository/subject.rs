@@ -22,4 +22,8 @@ impl Repository<Subject> for SubjectRepository<'_> {
 
         Ok(subject)
     }
+
+    fn find_all(&mut self) -> Result<Vec<Subject>, Box<dyn std::error::Error>> {
+        todo!()
+    }
 }

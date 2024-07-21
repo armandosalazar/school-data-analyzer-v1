@@ -10,6 +10,8 @@ use crate::repository::subject::SubjectRepository;
 use crate::repository::teacher::TeacherRepository;
 use crate::repository::Repository;
 
+pub mod teacher;
+
 #[tauri::command]
 pub fn upload_file(path: &str) {
     let mut schema: Schema = Schema::new();

@@ -1,6 +1,7 @@
 use diesel::prelude::*;
+use serde::Serialize;
 
-#[derive(Insertable, Queryable, Identifiable, Selectable)]
+#[derive(Insertable, Queryable, Identifiable, Selectable, Serialize)]
 #[diesel(table_name = crate::schema::teachers)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct Teacher {

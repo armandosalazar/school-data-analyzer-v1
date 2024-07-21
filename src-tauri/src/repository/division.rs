@@ -21,4 +21,8 @@ impl Repository<Division> for DivisionRepository<'_> {
 
         Ok(division)
     }
+
+    fn find_all(&mut self) -> Result<Vec<Division>, Box<dyn std::error::Error>> {
+        todo!()
+    }
 }
