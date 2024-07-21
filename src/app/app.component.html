@@ -1,8 +1,19 @@
 <div class="flex flex-1">
   <div class="w-72 h-screen border-l-slate-400 border p-2">
-    <p-panelMenu [model]="items" styleClass="w-full md:w-20rem" />
+    <p-panelMenu [model]="items">
+      <ng-template pTemplate="item" let-item>
+        <a [routerLink]="item.route" class="flex items-center px-2 py-1.5">
+          <i [class]="item.icon + ' text-blue-500'"></i>
+          <span class="ml-2">{{ item.label }}</span>
+          <i
+            *ngIf="item.items"
+            class="pi pi-angle-down ml-auto text-blue-500"
+          ></i>
+        </a>
+      </ng-template>
+    </p-panelMenu>
   </div>
-  <div class="w-full">
+  <div class="w-full container p-4 mx-auto">
     <router-outlet></router-outlet>
   </div>
 </div>

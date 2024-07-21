@@ -6,37 +6,49 @@ import { open } from '@tauri-apps/api/dialog';
 import { MenuItem } from 'primeng/api';
 import { PanelMenuModule } from 'primeng/panelmenu';
 import { ButtonModule } from 'primeng/button';
+import { MenuModule } from 'primeng/menu';
+import { BadgeModule } from 'primeng/badge';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, ButtonModule, PanelMenuModule],
+  imports: [
+    CommonModule,
+    RouterOutlet,
+    ButtonModule,
+    PanelMenuModule,
+    MenuModule,
+    BadgeModule,
+  ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
 export class AppComponent {
   items: MenuItem[] = [
     {
-      label: 'Files',
-      icon: 'pi pi-file',
+      label: 'Dashboard',
+      icon: 'pi pi-home',
+      route: '/',
+    },
+    {
+      label: 'Data Analysis',
+      icon: 'pi pi-chart-bar',
       items: [
         {
-          label: 'New',
-          icon: 'pi pi-plus',
+          label: 'Students',
+          icon: 'pi pi-users',
+          route: '/student',
         },
         {
-          label: 'Search',
-          icon: 'pi pi-search',
-        },
-        {
-          label: 'Print',
-          icon: 'pi pi-print',
+          label: 'Teachers',
+          icon: 'pi pi-user',
+          route: '/teacher',
         },
       ],
     },
     {
-      label: 'Sync',
-      icon: 'pi pi-cloud',
+      label: 'Reports',
+      icon: 'pi pi-file',
       items: [
         {
           label: 'Import',
@@ -49,8 +61,8 @@ export class AppComponent {
       ],
     },
     {
-      label: 'Sign Out',
-      icon: 'pi pi-sign-out',
+      label: 'Settings',
+      icon: 'pi pi-cog',
     },
   ];
 
