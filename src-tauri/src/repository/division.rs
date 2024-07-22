@@ -14,11 +14,7 @@ impl<'a> DivisionRepository<'a> {
 }
 
 impl Repository<Division> for DivisionRepository<'_> {
-    fn find_all(
-        &mut self,
-        offset: Option<i64>,
-        page_size: Option<i64>,
-    ) -> Result<Vec<Division>, Box<dyn std::error::Error>> {
+    fn count(&mut self) -> Result<i64, Box<dyn std::error::Error>> {
         todo!()
     }
 
@@ -30,7 +26,12 @@ impl Repository<Division> for DivisionRepository<'_> {
         Ok(division)
     }
 
-    fn count(&mut self) -> Result<i64, Box<dyn std::error::Error>> {
+    fn find_all(
+        &mut self,
+        offset: Option<i64>,
+        page_size: Option<i64>,
+        filters: Option<String>,
+    ) -> Result<Vec<Division>, Box<dyn std::error::Error>> {
         todo!()
     }
 }

@@ -39,7 +39,8 @@ export class TeacherComponent implements OnInit {
     console.log(event);
     this.teachers = await this.teacherService.getTeachers(
       event.first,
-      event.rows
+      event.rows,
+      event.filters
     );
   }
 

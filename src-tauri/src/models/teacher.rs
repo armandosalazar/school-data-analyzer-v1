@@ -1,5 +1,5 @@
 use diesel::prelude::*;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 #[derive(Insertable, Queryable, Identifiable, Selectable, Serialize)]
 #[diesel(table_name = crate::schema::teachers)]
@@ -18,4 +18,18 @@ impl Teacher {
             name: Some(name),
         }
     }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Filter {
+    pub value: Option<String>,
+    #[serde(rename = "matchMode")]
+    pub match_mode: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct TeacherFilters {
+    pub id: Option<Filter>,
+    pub payfoll: Option<Filter>,
+    pub name: Option<Filter>,
 }

@@ -17,7 +17,15 @@ export class TeacherService {
     return await invoke<number>('count_teachers');
   }
 
-  async getTeachers(offset: number, pageSize: number): Promise<Teacher[]> {
-    return await invoke<Teacher[]>('get_teachers', { offset, pageSize });
+  async getTeachers(
+    offset: number,
+    pageSize: number,
+    filters: object
+  ): Promise<Teacher[]> {
+    return await invoke<Teacher[]>('get_teachers', {
+      offset,
+      pageSize,
+      filters: JSON.stringify(filters),
+    });
   }
 }
