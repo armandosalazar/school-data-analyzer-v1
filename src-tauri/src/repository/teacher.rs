@@ -52,6 +52,45 @@ impl Repository<Teacher> for TeacherRepository<'_> {
                 }
             }
         }
+        if let Some(filter) = teacher_filters.name {
+            if let Some(value) = filter.value {
+                match filter.match_mode.as_str() {
+                    "startsWith" => {
+                        query =
+                            query.filter(crate::schema::teachers::name.like(format!("{}%", value)))
+                    }
+                    "contains" => {
+                        query =
+                            query.filter(crate::schema::teachers::name.like(format!("%{}%", value)))
+                    }
+                    "notContains" => {
+                        query = query.filter(
+                            crate::schema::teachers::name
+                                .not_like(format!("%{}%", value))
+                                .or(crate::schema::teachers::name.not_like(format!("{}%", value))),
+                        )
+                    }
+                    "endsWith" => {
+                        query =
+                            query.filter(crate::schema::teachers::name.like(format!("%{}", value)))
+                    }
+                    "equals" => query = query.filter(crate::schema::teachers::name.eq(value)),
+                    "notEquals" => query = query.filter(crate::schema::teachers::name.ne(value)),
+                    _ => {}
+                }
+            }
+        }
+        if let Some(filter) = teacher_filters.payfoll {
+            if let Some(value) = filter.value {
+                match filter.match_mode.as_str() {
+                    "startsWith" => {
+                        query =
+                            query.filter(crate::schema::teachers::payfoll.eq(value.parse::<i32>()?))
+                    }
+                    _ => {}
+                }
+            }
+        }
 
         let teachers = query
             .limit(page_size.unwrap())

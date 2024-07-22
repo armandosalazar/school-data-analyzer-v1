@@ -4,7 +4,7 @@ import { TeacherService } from './teacher.service';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
-import { LazyLoadEvent } from 'primeng/api';
+import { LazyLoadEvent, SelectItem } from 'primeng/api';
 import { event } from '@tauri-apps/api';
 
 interface Teacher {
@@ -30,6 +30,7 @@ export class TeacherComponent implements OnInit {
   teacherService = inject(TeacherService);
   totalRecords: number = 0;
   teachers: Teacher[] = [];
+  modeOptions: SelectItem[] = [{ label: 'Equals', value: 'equals' }];
 
   ngOnInit() {
     this.getData();
