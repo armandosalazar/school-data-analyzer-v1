@@ -15,6 +15,7 @@
   [lazy]="true"
   (onLazyLoad)="loadTeachers($event)"
   [totalRecords]="totalRecords"
+  [rowsPerPageOptions]="[5, 10, 20]"
   styleClass="p-datatable-sm"
 >
   <ng-template pTemplate="caption">

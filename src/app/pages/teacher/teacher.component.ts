@@ -35,11 +35,11 @@ export class TeacherComponent implements OnInit {
     this.getData();
   }
 
-  async loadTeachers($event: any) {
-    console.log($event);
+  async loadTeachers(event: any) {
+    console.log(event);
     this.teachers = await this.teacherService.getTeachers(
-      $event.first,
-      $event.rows
+      event.first,
+      event.rows
     );
   }
 
