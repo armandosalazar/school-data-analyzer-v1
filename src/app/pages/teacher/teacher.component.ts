@@ -1,6 +1,11 @@
-import { Component, OnInit } from '@angular/core';
-import { invoke } from '@tauri-apps/api/tauri';
+import { Component, inject, OnInit } from '@angular/core';
 import { TableModule } from 'primeng/table';
+import { TeacherService } from './teacher.service';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
+import { InputTextModule } from 'primeng/inputtext';
+import { LazyLoadEvent } from 'primeng/api';
+import { event } from '@tauri-apps/api';
 
 interface Teacher {
   id: number;
@@ -11,20 +16,34 @@ interface Teacher {
 @Component({
   selector: 'app-teacher',
   standalone: true,
-  imports: [TableModule],
+  imports: [
+    TableModule,
+    IconFieldModule,
+    InputIconModule,
+    InputTextModule,
+    // TagModule,
+  ],
   templateUrl: './teacher.component.html',
   styleUrl: './teacher.component.css',
 })
 export class TeacherComponent implements OnInit {
+  teacherService = inject(TeacherService);
+  totalRecords: number = 0;
   teachers: Teacher[] = [];
 
   ngOnInit() {
-    this.getTeachers();
+    this.getData();
   }
 
-  async getTeachers() {
-    const res = await invoke<Teacher[]>('get_teachers');
-    console.log(res);
-    this.teachers = res;
+  async loadTeachers($event: any) {
+    console.log($event);
+    this.teachers = await this.teacherService.getTeachers(
+      $event.first,
+      $event.rows
+    );
+  }
+
+  async getData() {
+    this.totalRecords = await this.teacherService.countTeachers();
   }
 }

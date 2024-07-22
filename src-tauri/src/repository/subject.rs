@@ -23,7 +23,15 @@ impl Repository<Subject> for SubjectRepository<'_> {
         Ok(subject)
     }
 
-    fn find_all(&mut self) -> Result<Vec<Subject>, Box<dyn std::error::Error>> {
+    fn find_all(
+        &mut self,
+        offset: Option<i64>,
+        page_size: Option<i64>,
+    ) -> Result<Vec<Subject>, Box<dyn std::error::Error>> {
+        todo!()
+    }
+
+    fn count(&mut self) -> Result<i64, Box<dyn std::error::Error>> {
         todo!()
     }
 }

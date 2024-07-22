@@ -1,9 +1,60 @@
-<p-table [value]="teachers" styleClass="p-datatable-sm">
+<!-- <p-table
+  [value]="teachers"
+  [paginator]="true"
+  [rows]="10"
+  [first]="first"
+  [totalRecords]="totalRecords"
+  [rowsPerPageOptions]="[5, 10, 20]"
+  (onPage)="onPageChange($event)"
+  styleClass="p-datatable-sm"
+> -->
+<p-table
+  [value]="teachers"
+  [paginator]="true"
+  [rows]="10"
+  [lazy]="true"
+  (onLazyLoad)="loadTeachers($event)"
+  [totalRecords]="totalRecords"
+  styleClass="p-datatable-sm"
+>
+  <ng-template pTemplate="caption">
+    <p-iconField>
+      <p-inputIcon> <i class="pi pi-search"></i> </p-inputIcon>
+      <input pInputText type="text" />
+    </p-iconField>
+  </ng-template>
+
   <ng-template pTemplate="header">
     <tr>
-      <th>Id</th>
+      <th pSortableColumn="id">Id <p-sortIcon field="id"></p-sortIcon></th>
       <th>Payfoll</th>
       <th>Name</th>
+    </tr>
+    <tr>
+      <th>
+        <p-columnFilter
+          type="text"
+          field="id"
+          placeholder="Seach by Id"
+          ariaLabel="Filter by Id"
+        ></p-columnFilter>
+      </th>
+      <th>
+        <p-columnFilter
+          type="text"
+          field="payfoll"
+          placeholder="Seach by Payfoll"
+          ariaLabel="Filter by Payfoll"
+        ></p-columnFilter>
+      </th>
+      <th>
+        <p-columnFilter
+          type="text"
+          field="name"
+          placeholder="Seach by Name"
+          ariaLabel="Filter by Name"
+        ></p-columnFilter>
+      </th>
     </tr>
   </ng-template>
   <ng-template pTemplate="body" let-teacher>

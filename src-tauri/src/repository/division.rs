@@ -14,6 +14,14 @@ impl<'a> DivisionRepository<'a> {
 }
 
 impl Repository<Division> for DivisionRepository<'_> {
+    fn find_all(
+        &mut self,
+        offset: Option<i64>,
+        page_size: Option<i64>,
+    ) -> Result<Vec<Division>, Box<dyn std::error::Error>> {
+        todo!()
+    }
+
     fn create(&mut self, entity: Division) -> Result<Division, Box<dyn std::error::Error>> {
         let division = diesel::insert_into(crate::schema::divisions::table)
             .values(&entity)
@@ -22,7 +30,7 @@ impl Repository<Division> for DivisionRepository<'_> {
         Ok(division)
     }
 
-    fn find_all(&mut self) -> Result<Vec<Division>, Box<dyn std::error::Error>> {
+    fn count(&mut self) -> Result<i64, Box<dyn std::error::Error>> {
         todo!()
     }
 }

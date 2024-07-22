@@ -1,3 +1,4 @@
+use chrono::offset;
 use diesel::prelude::*;
 
 use super::Repository;
@@ -14,8 +15,15 @@ impl<'a> TeacherRepository<'a> {
 }
 
 impl Repository<Teacher> for TeacherRepository<'_> {
-    fn find_all(&mut self) -> Result<Vec<Teacher>, Box<dyn std::error::Error>> {
-        let teachers = crate::schema::teachers::table.load::<Teacher>(self.conn)?;
+    fn find_all(
+        &mut self,
+        offset: Option<i64>,
+        page_size: Option<i64>,
+    ) -> Result<Vec<Teacher>, Box<dyn std::error::Error>> {
+        let teachers = crate::schema::teachers::table
+            .limit(page_size.unwrap())
+            .offset(offset.unwrap())
+            .load::<Teacher>(self.conn)?;
 
         Ok(teachers)
     }
@@ -26,5 +34,13 @@ impl Repository<Teacher> for TeacherRepository<'_> {
             .get_result(self.conn)?;
 
         Ok(teacher)
+    }
+
+    fn count(&mut self) -> Result<i64, Box<dyn std::error::Error>> {
+        let count = crate::schema::teachers::table
+            .count()
+            .get_result::<i64>(self.conn)?;
+
+        Ok(count)
     }
 }
