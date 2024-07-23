@@ -44,6 +44,21 @@ export class AppComponent {
           icon: 'pi pi-user',
           route: '/teacher',
         },
+        {
+          label: 'Divisions',
+          icon: 'pi pi-th-large',
+          route: '/division',
+        },
+        {
+          label: 'Subjects',
+          icon: 'pi pi-book',
+          route: '/subject',
+        },
+        {
+          label: 'Specialities',
+          icon: 'pi pi-star',
+          route: '/speciality',
+        },
       ],
     },
     {

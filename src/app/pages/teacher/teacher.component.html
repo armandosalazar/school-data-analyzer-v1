@@ -8,13 +8,12 @@
   [rowsPerPageOptions]="[5, 10, 20]"
   styleClass="p-datatable-sm"
 >
-  <ng-template pTemplate="caption">
+  <!-- <ng-template pTemplate="caption">
     <p-iconField>
       <p-inputIcon> <i class="pi pi-search"></i> </p-inputIcon>
       <input pInputText type="text" />
     </p-iconField>
-  </ng-template>
-
+  </ng-template> -->
   <ng-template pTemplate="header">
     <tr>
       <th pSortableColumn="id">Id <p-sortIcon field="id"></p-sortIcon></th>
@@ -37,6 +36,7 @@
           field="payfoll"
           placeholder="Seach by Payfoll"
           ariaLabel="Filter by Payfoll"
+          [matchModeOptions]="modeOptions"
         ></p-columnFilter>
       </th>
       <th>

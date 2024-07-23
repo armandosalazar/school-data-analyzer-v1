@@ -4,8 +4,7 @@ import { TeacherService } from './teacher.service';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
-import { LazyLoadEvent, SelectItem } from 'primeng/api';
-import { event } from '@tauri-apps/api';
+import { SelectItem } from 'primeng/api';
 
 interface Teacher {
   id: number;
