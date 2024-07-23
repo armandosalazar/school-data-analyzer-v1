@@ -19,6 +19,8 @@
     "@angular/platform-browser-dynamic": "^17.0.0",
     "@angular/router": "^17.0.0",
     "@tauri-apps/api": "^1",
+    "@types/lodash": "^4.17.7",
+    "lodash": "^4.17.21",
     "primeicons": "^7.0.0",
     "primeng": "^17.18.3",
     "rxjs": "~7.8.0",

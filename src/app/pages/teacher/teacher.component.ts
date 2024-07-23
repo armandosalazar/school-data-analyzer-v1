@@ -5,6 +5,7 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectItem } from 'primeng/api';
+import _ from 'lodash';
 
 interface Teacher {
   id: number;
@@ -15,36 +16,39 @@ interface Teacher {
 @Component({
   selector: 'app-teacher',
   standalone: true,
-  imports: [
-    TableModule,
-    IconFieldModule,
-    InputIconModule,
-    InputTextModule,
-    // TagModule,
-  ],
+  imports: [TableModule, IconFieldModule, InputIconModule, InputTextModule],
   templateUrl: './teacher.component.html',
   styleUrl: './teacher.component.css',
 })
-export class TeacherComponent implements OnInit {
+export class TeacherComponent {
   teacherService = inject(TeacherService);
   totalRecords: number = 0;
   teachers: Teacher[] = [];
   modeOptions: SelectItem[] = [{ label: 'Equals', value: 'equals' }];
-
-  ngOnInit() {
-    this.getData();
-  }
+  emptyFilters: object = {
+    id: { value: null, matchMode: 'startsWith' },
+    payfoll: { value: null, matchMode: 'startsWith' },
+    name: { value: null, matchMode: 'startsWith' },
+  };
 
   async loadTeachers(event: any) {
-    console.log(event);
-    this.teachers = await this.teacherService.getTeachers(
-      event.first,
-      event.rows,
-      event.filters
-    );
-  }
-
-  async getData() {
-    this.totalRecords = await this.teacherService.countTeachers();
+    if (
+      _.isEqual(event.filters, this.emptyFilters) ||
+      _.isEmpty(event.filters)
+    ) {
+      this.teachers = await this.teacherService.getTeachers(
+        event.first,
+        event.rows,
+        event.filters
+      );
+      this.totalRecords = await this.teacherService.countTeachers();
+    } else {
+      this.teachers = await this.teacherService.getTeachers(
+        event.first,
+        event.rows,
+        event.filters
+      );
+      this.totalRecords = this.teachers.length;
+    }
   }
 }
