@@ -21,7 +21,7 @@ diesel::table! {
 }
 
 diesel::table! {
-    specialties (id) {
+    specialities (id) {
         id -> Nullable<Integer>,
         code -> Nullable<Integer>,
         name -> Nullable<Text>,
@@ -64,14 +64,13 @@ diesel::table! {
 
 diesel::joinable!(grades -> students (student_id));
 diesel::joinable!(grades -> subjects (subject_id));
-diesel::joinable!(students -> specialties (specialty_id));
 diesel::joinable!(subjects -> divisions (division_id));
 diesel::joinable!(subjects -> teachers (teacher_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     divisions,
     grades,
-    specialties,
+    specialities,
     students,
     subjects,
     teachers,

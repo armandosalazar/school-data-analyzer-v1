@@ -1,3 +1,8 @@
+use diesel::prelude::*;
+
+#[derive(Insertable, Queryable)]
+#[diesel(table_name = crate::schema::specialities)]
+#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct Speciality {
     pub id: Option<i32>,
     pub code: Option<i32>,

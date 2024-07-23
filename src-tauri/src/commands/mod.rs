@@ -8,6 +8,7 @@ use crate::models::teacher::Teacher;
 use crate::repository::division::DivisionRepository;
 use crate::repository::subject::SubjectRepository;
 use crate::repository::teacher::TeacherRepository;
+use crate::repository::speciality::SpecialityRepository;
 use crate::repository::Repository;
 
 pub mod teacher;
@@ -17,6 +18,7 @@ pub fn upload_file(path: &str) {
     let mut schema: Schema = Schema::new();
     schema.with_column("nomina".into(), DataType::Int32);
     schema.with_column("division".into(), DataType::Int32);
+    schema.with_column("especialidad".into(), DataType::Int32);
 
     let df: LazyFrame = LazyCsvReader::new(path)
         .with_dtype_overwrite(Some(Arc::new(schema)))
@@ -35,12 +37,16 @@ pub fn upload_file(path: &str) {
     //     Ok(_) => println!("Divisions created successfully"),
     //     Err(e) => println!("Error creating divisions: {:?}", e),
     // }
-
-    let mut subject_repository = SubjectRepository::new(&mut conn);
-    match create_subjects(&df, &mut subject_repository) {
-        Ok(_) => println!("Subjects created successfully"),
-        Err(e) => println!("Error creating subjects: {:?}", e),
-    }
+    // let mut subject_repository = SubjectRepository::new(&mut conn);
+    // match create_subjects(&df, &mut subject_repository) {
+    //     Ok(_) => println!("Subjects created successfully"),
+    //     Err(e) => println!("Error creating subjects: {:?}", e),
+    // }
+    // let mut speciality_repository = SpecialityRepository::new(&mut conn);
+    // match create_specialities(&df, &mut speciality_repository) {
+    //     Ok(_) => println!("Specialities created successfully"),
+    //     Err(e) => println!("Error creating specialities: {:?}", e),
+    // }
 }
 
 #[allow(dead_code)]
@@ -108,11 +114,6 @@ fn create_subjects(
     df: &LazyFrame,
     repository: &mut SubjectRepository,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    // let names: Vec<_> = teachers
-    //     .filter(crate::schema::teachers::payfoll.eq(1194))
-    //     .or_filter(crate::schema::teachers::name.eq("GONZALEZ LOMELI CHRISTIAN"))
-    //     .select(id)
-    //     .load::<Option<i32>>(repository.conn)?;
     let result = df
         .clone()
         .lazy()
@@ -182,26 +183,33 @@ fn create_subjects(
         }
     }
 
-    // let teacher_id: Option<i32> = crate::schema::teachers::dsl::teachers
-    //     .filter(crate::schema::teachers::payfoll.eq(1194))
-    //     .or_filter(crate::schema::teachers::name.eq("GONZALEZ LOMELI CHRISTIAN"))
-    //     .select(crate::schema::teachers::id)
-    //     .first::<Option<i32>>(repository.conn)?;
+    Ok(())
+}
 
-    // let division_id: Option<i32> = crate::schema::divisions::table
-    //     .filter(crate::schema::divisions::academy.eq("Matemáticas"))
-    //     .select(crate::schema::divisions::id)
-    //     .first::<Option<i32>>(repository.conn)?;
+#[allow(dead_code)]
+fn create_specialities(
+    df: &LazyFrame,
+    repository: &mut SpecialityRepository,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let result = df
+        .clone()
+        .lazy()
+        .select(&[col("especialidad").alias("code"), col("nombre").alias("name")])
+        .group_by([col("code")])
+        .agg([col("name").unique()])
+        .sort(["code"], Default::default())
+        .explode(["name"])
+        .collect()?;
 
-    // match repository.create(Subject::new(
-    //     1,
-    //     1,
-    //     "xxx".to_string(),
-    //     "Matemáticas".to_string(),
-    // )) {
-    //     Ok(_) => println!("Subject created successfully"),
-    //     Err(e) => println!("Error creating subject: {:?}", e),
-    // }
+    for i in 0..result.height() {
+        match repository.create(crate::models::speciality::Speciality::new(
+            result.column("code")?.i32()?.get(i).unwrap(),
+            result.column("name")?.str()?.get(i).unwrap().to_string(),
+        )) {
+            Ok(_) => continue,
+            Err(e) => println!("Error creating speciality: {:?}", e),
+        }
+    }
 
     Ok(())
 }

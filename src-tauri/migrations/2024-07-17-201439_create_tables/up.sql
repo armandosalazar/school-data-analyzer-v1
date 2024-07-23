@@ -12,7 +12,7 @@ CREATE TABLE students (
   level TEXT,
   FOREIGN KEY(specialty_id) REFERENCES specialties(id)
 );
-CREATE TABLE specialties (
+CREATE TABLE specialities (
   id INTEGER PRIMARY KEY,
   code INTEGER,
   name TEXT

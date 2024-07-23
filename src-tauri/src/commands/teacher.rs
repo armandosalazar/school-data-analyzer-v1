@@ -8,13 +8,10 @@ pub fn get_teachers(
 ) -> Vec<crate::models::teacher::Teacher> {
     let mut conn = crate::database::establish_connection();
     let mut teacher_repository = crate::repository::teacher::TeacherRepository::new(&mut conn);
-    match teacher_repository.find_all(offset, page_size, filters) {
-        Ok(teachers) => teachers,
-        Err(e) => {
-            println!("Error getting teachers: {:?}", e);
-            Vec::new()
-        }
-    }
+    teacher_repository.find_all(offset, page_size, filters).unwrap_or_else(|e| {
+        println!("Error getting teachers: {:?}", e);
+        Vec::new()
+    })
 }
 
 #[tauri::command]
@@ -22,11 +19,8 @@ pub fn count_teachers() -> i64 {
     println!("Counting teachers");
     let mut conn = crate::database::establish_connection();
     let mut teacher_repository = crate::repository::teacher::TeacherRepository::new(&mut conn);
-    match teacher_repository.count() {
-        Ok(count) => count,
-        Err(e) => {
-            println!("Error counting teachers: {:?}", e);
-            0
-        }
-    }
+    teacher_repository.count().unwrap_or_else(|e| {
+        println!("Error counting teachers: {:?}", e);
+        0
+    })
 }
