@@ -1,40 +1,45 @@
-// #[derive(Debug, Insertable, Queryable)]
-// #[diesel(table_name = students)]
-// pub struct Student {
-//     pub register: i32,
-//     pub fullname: String,
-//     pub type_: String,
-//     pub status: String,
-//     pub semester: String,
-//     pub group: String,
-//     pub turn: String,
-//     pub level: String,
-//     pub created_at: chrono::NaiveDateTime,
-//     pub updated_at: chrono::NaiveDateTime,
-// }
+use diesel::prelude::*;
+// use crate::schema::students::speciality_id;
 
-// impl Student {
-//     pub fn new(
-//         register: i32,
-//         fullname: String,
-//         type_: String,
-//         status: String,
-//         semester: String,
-//         group: String,
-//         turn: String,
-//         level: String,
-//     ) -> Self {
-//         Student {
-//             register,
-//             fullname,
-//             type_,
-//             status,
-//             semester,
-//             group,
-//             turn,
-//             level,
-//             created_at: chrono::Local::now().naive_local(),
-//             updated_at: chrono::Local::now().naive_local(),
-//         }
-//     }
-// }
+#[derive(Insertable, Queryable)]
+#[diesel(table_name = crate::schema::students)]
+#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
+pub struct Student {
+    pub id: Option<i32>,
+    pub speciality_id: Option<i32>,
+    pub register: Option<i32>,
+    pub name: Option<String>,
+    pub type_: Option<String>,
+    pub status: Option<String>,
+    pub semester: Option<i32>,
+    pub group: Option<String>,
+    pub turn: Option<String>,
+    pub level: Option<String>,
+}
+
+impl Student {
+    pub fn new(
+        speciality_id: i32,
+        register: i32,
+        name: String,
+        type_: String,
+        status: String,
+        semester: i32,
+        group: String,
+        turn: String,
+        level: String,
+    ) -> Self {
+        Student {
+            id: None,
+            speciality_id: Some(speciality_id),
+            register: Some(register),
+            name: Some(name),
+            type_: Some(type_),
+            status: Some(status),
+            semester: Some(semester),
+            group: Some(group),
+            turn: Some(turn),
+            level: Some(level),
+        }
+    }
+}

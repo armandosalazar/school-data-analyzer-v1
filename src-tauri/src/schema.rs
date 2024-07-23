@@ -31,13 +31,13 @@ diesel::table! {
 diesel::table! {
     students (id) {
         id -> Nullable<Integer>,
-        specialty_id -> Nullable<Integer>,
+        speciality_id -> Nullable<Integer>,
         register -> Nullable<Integer>,
         name -> Nullable<Text>,
         #[sql_name = "type"]
         type_ -> Nullable<Text>,
         status -> Nullable<Text>,
-        semester -> Nullable<Text>,
+        semester -> Nullable<Integer>,
         group -> Nullable<Text>,
         turn -> Nullable<Text>,
         level -> Nullable<Text>,
@@ -64,6 +64,7 @@ diesel::table! {
 
 diesel::joinable!(grades -> students (student_id));
 diesel::joinable!(grades -> subjects (subject_id));
+diesel::joinable!(students -> specialities (speciality_id));
 diesel::joinable!(subjects -> divisions (division_id));
 diesel::joinable!(subjects -> teachers (teacher_id));
 

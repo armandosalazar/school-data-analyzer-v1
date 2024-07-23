@@ -1,16 +1,16 @@
 -- Your SQL goes here
 CREATE TABLE students (
   id INTEGER PRIMARY KEY,
-  specialty_id INTEGER,
+  speciality_id INTEGER,
   register INTEGER,
   name TEXT,
   type TEXT,
   status TEXT,
-  semester TEXT,
+  semester INTEGER,
   `group` TEXT,
   turn TEXT,
   level TEXT,
-  FOREIGN KEY(specialty_id) REFERENCES specialties(id)
+  FOREIGN KEY(speciality_id) REFERENCES specialities(id)
 );
 CREATE TABLE specialities (
   id INTEGER PRIMARY KEY,

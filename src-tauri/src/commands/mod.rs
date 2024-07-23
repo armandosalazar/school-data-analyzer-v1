@@ -10,6 +10,7 @@ use crate::repository::subject::SubjectRepository;
 use crate::repository::teacher::TeacherRepository;
 use crate::repository::speciality::SpecialityRepository;
 use crate::repository::Repository;
+use crate::repository::student::StudentRepository;
 
 pub mod teacher;
 
@@ -19,6 +20,8 @@ pub fn upload_file(path: &str) {
     schema.with_column("nomina".into(), DataType::Int32);
     schema.with_column("division".into(), DataType::Int32);
     schema.with_column("especialidad".into(), DataType::Int32);
+    schema.with_column("registro".into(), DataType::Int32);
+    schema.with_column("semestre".into(), DataType::Int32);
 
     let df: LazyFrame = LazyCsvReader::new(path)
         .with_dtype_overwrite(Some(Arc::new(schema)))
@@ -27,26 +30,30 @@ pub fn upload_file(path: &str) {
 
     let mut conn = database::establish_connection();
 
-    // let mut teacher_repository = TeacherRepository::new(&mut conn);
-    // match create_teachers(&df, &mut teacher_repository) {
-    //     Ok(_) => println!("Teachers created successfully"),
-    //     Err(e) => println!("Error creating teachers: {:?}", e),
-    // }
-    // let mut division_repository = DivisionRepository::new(&mut conn);
-    // match create_divisions(&df, &mut division_repository) {
-    //     Ok(_) => println!("Divisions created successfully"),
-    //     Err(e) => println!("Error creating divisions: {:?}", e),
-    // }
-    // let mut subject_repository = SubjectRepository::new(&mut conn);
-    // match create_subjects(&df, &mut subject_repository) {
-    //     Ok(_) => println!("Subjects created successfully"),
-    //     Err(e) => println!("Error creating subjects: {:?}", e),
-    // }
-    // let mut speciality_repository = SpecialityRepository::new(&mut conn);
-    // match create_specialities(&df, &mut speciality_repository) {
-    //     Ok(_) => println!("Specialities created successfully"),
-    //     Err(e) => println!("Error creating specialities: {:?}", e),
-    // }
+    let mut teacher_repository = TeacherRepository::new(&mut conn);
+    match create_teachers(&df, &mut teacher_repository) {
+        Ok(_) => println!("Teachers created successfully"),
+        Err(e) => println!("Error creating teachers: {:?}", e),
+    }
+    let mut division_repository = DivisionRepository::new(&mut conn);
+    match create_divisions(&df, &mut division_repository) {
+        Ok(_) => println!("Divisions created successfully"),
+        Err(e) => println!("Error creating divisions: {:?}", e),
+    }
+    let mut subject_repository = SubjectRepository::new(&mut conn);
+    match create_subjects(&df, &mut subject_repository) {
+        Ok(_) => println!("Subjects created successfully"),
+        Err(e) => println!("Error creating subjects: {:?}", e),
+    }
+    let mut speciality_repository = SpecialityRepository::new(&mut conn);
+    match create_specialities(&df, &mut speciality_repository) {
+        Ok(_) => println!("Specialities created successfully"),
+        Err(e) => println!("Error creating specialities: {:?}", e),
+    }
+    match create_students(&df, &mut StudentRepository::new(&mut conn)) {
+        Ok(_) => println!("Students created successfully"),
+        Err(e) => println!("Error creating students: {:?}", e),
+    }
 }
 
 #[allow(dead_code)]
@@ -208,6 +215,78 @@ fn create_specialities(
         )) {
             Ok(_) => continue,
             Err(e) => println!("Error creating speciality: {:?}", e),
+        }
+    }
+
+    Ok(())
+}
+
+#[allow(dead_code)]
+fn create_students(
+    df: &LazyFrame,
+    repository: &mut StudentRepository,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let result =  df.clone()
+        .lazy()
+        .select(&[
+            col("registro"),
+            col("nombre_completo").alias("nombre"),
+            col("tipo"),
+            col("estado"),
+            col("semestre"),
+            col("grupo"),
+            col("turno"),
+            col("nivel"),
+            col("especialidad"),
+            col("nombre").alias("nombre_especialidad"),
+        ])
+        .group_by([col("registro")])
+        .agg([
+            col("nombre").unique().first(),
+            col("tipo").unique().first(),
+            col("estado").unique().first(),
+            col("semestre").unique().first(),
+            col("grupo").unique().first(),
+            col("turno").unique().first(),
+            col("nivel").unique().first(),
+            col("especialidad").unique().first(),
+            col("nombre_especialidad").unique().first(),
+        ])
+        .sort(["registro"], Default::default())
+        .collect()?;
+
+    for i in 0..result.height() {
+        let speciality_id: Option<i32> = crate::schema::specialities::table
+            .filter(
+                crate::schema::specialities::code.eq(result
+                    .column("especialidad")?
+                    .i32()?
+                    .get(i)
+                    .unwrap()),
+            )
+            .or_filter(
+                crate::schema::specialities::name.eq(result
+                    .column("nombre_especialidad")?
+                    .str()?
+                    .get(i)
+                    .unwrap()),
+            )
+            .select(crate::schema::specialities::id)
+            .first::<Option<i32>>(repository.conn)?;
+
+        match repository.create(crate::models::student::Student::new(
+            speciality_id.unwrap(),
+            result.column("registro")?.i32()?.get(i).unwrap(),
+            result.column("nombre")?.str()?.get(i).unwrap().to_string(),
+            result.column("tipo")?.str()?.get(i).unwrap().to_string(),
+            result.column("estado")?.str()?.get(i).unwrap().to_string(),
+            result.column("semestre")?.i32()?.get(i).unwrap(),
+            result.column("grupo")?.str()?.get(i).unwrap().to_string(),
+            result.column("turno")?.str()?.get(i).unwrap().to_string(),
+            result.column("nivel")?.str()?.get(i).unwrap().to_string(),
+        )) {
+            Ok(_) => continue,
+            Err(e) => println!("Error creating student: {:?}", e),
         }
     }
 
