@@ -1,11 +1,12 @@
 use diesel::prelude::*;
 use polars::prelude::*;
-
+use serde::de::Error;
 use crate::database;
 use crate::models::division::Division;
 use crate::models::subject::Subject;
 use crate::models::teacher::Teacher;
 use crate::repository::division::DivisionRepository;
+use crate::repository::grade::GradeRepository;
 use crate::repository::subject::SubjectRepository;
 use crate::repository::teacher::TeacherRepository;
 use crate::repository::speciality::SpecialityRepository;
@@ -30,29 +31,29 @@ pub fn upload_file(path: &str) {
 
     let mut conn = database::establish_connection();
 
-    let mut teacher_repository = TeacherRepository::new(&mut conn);
-    match create_teachers(&df, &mut teacher_repository) {
+    match create_teachers(&df, &mut TeacherRepository::new(&mut conn)) {
         Ok(_) => println!("Teachers created successfully"),
         Err(e) => println!("Error creating teachers: {:?}", e),
     }
-    let mut division_repository = DivisionRepository::new(&mut conn);
-    match create_divisions(&df, &mut division_repository) {
+    match create_divisions(&df, &mut DivisionRepository::new(&mut conn)) {
         Ok(_) => println!("Divisions created successfully"),
         Err(e) => println!("Error creating divisions: {:?}", e),
     }
-    let mut subject_repository = SubjectRepository::new(&mut conn);
-    match create_subjects(&df, &mut subject_repository) {
+    match create_subjects(&df, &mut SubjectRepository::new(&mut conn)) {
         Ok(_) => println!("Subjects created successfully"),
         Err(e) => println!("Error creating subjects: {:?}", e),
     }
-    let mut speciality_repository = SpecialityRepository::new(&mut conn);
-    match create_specialities(&df, &mut speciality_repository) {
+    match create_specialities(&df, &mut SpecialityRepository::new(&mut conn)) {
         Ok(_) => println!("Specialities created successfully"),
         Err(e) => println!("Error creating specialities: {:?}", e),
     }
     match create_students(&df, &mut StudentRepository::new(&mut conn)) {
         Ok(_) => println!("Students created successfully"),
         Err(e) => println!("Error creating students: {:?}", e),
+    }
+    match create_grades(&df, &mut GradeRepository::new(&mut conn)) {
+        Ok(_) => println!("Grades created successfully"),
+        Err(e) => println!("Error creating grades: {:?}", e),
     }
 }
 
@@ -145,7 +146,7 @@ fn create_subjects(
     for i in 0..result.height() {
         let teacher_id: Option<i32> = crate::schema::teachers::dsl::teachers
             .filter(
-                crate::schema::teachers::payfoll.eq(result
+                crate::schema::teachers::payroll.eq(result
                     .column("nomina")?
                     .i32()?
                     .get(i)
@@ -170,7 +171,7 @@ fn create_subjects(
                     .unwrap()),
             )
             .or_filter(
-                crate::schema::divisions::academy.eq(result
+                crate::schema::divisions::name.eq(result
                     .column("academia")?
                     .str()?
                     .get(i)
@@ -226,7 +227,7 @@ fn create_students(
     df: &LazyFrame,
     repository: &mut StudentRepository,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let result =  df.clone()
+    let result = df.clone()
         .lazy()
         .select(&[
             col("registro"),
@@ -287,6 +288,358 @@ fn create_students(
         )) {
             Ok(_) => continue,
             Err(e) => println!("Error creating student: {:?}", e),
+        }
+    }
+
+    Ok(())
+}
+
+#[allow(dead_code)]
+fn create_grades(df: &LazyFrame, repository: &mut crate::repository::grade::GradeRepository) -> Result<(), Box<dyn std::error::Error>> {
+    if df.clone().schema()?.index_of("calificacion1").is_some() & df.clone().schema()?.index_of("calificacion2").is_some() & df.clone().schema()?.index_of("calificacion3").is_some() {
+        let result = df.clone()
+            .lazy()
+            .select(
+                &[
+                    col("registro"),
+                    col("nombre_completo").alias("nombre_alumno"),
+                    col("clave"),
+                    col("nombre_duplicated_0").alias("nombre_materia"),
+                    col("estatus_materia"),
+                    col("nomina").alias("nomina_maestro"),
+                    col("calificacion1").alias("calificacion_primer_parcial"),
+                    col("faltas1").alias("faltas_primer_parcial"),
+                    col("ponderacion1").alias("ponderacion_primer_parcial"),
+                    col("calificacion2").alias("calificacion_segundo_parcial"),
+                    col("faltas2").alias("faltas_segundo_parcial"),
+                    col("ponderacion2").alias("ponderacion_segundo_parcial"),
+                    col("calificacion3").alias("calificacion_tercer_parcial"),
+                    col("faltas3").alias("faltas_tercer_parcial"),
+                    col("ponderacion3").alias("ponderacion_tercer_parcial"),
+                ]
+            )
+            .group_by([col("registro"), col("clave")])
+            .agg(
+                [
+                    col("nombre_alumno").unique().first(),
+                    col("nombre_materia").unique().first(),
+                    col("estatus_materia").unique().first(),
+                    col("nomina_maestro").unique().first(),
+                    col("calificacion_primer_parcial").unique().first(),
+                    col("faltas_primer_parcial").unique().first(),
+                    col("ponderacion_primer_parcial").unique().first(),
+                    col("calificacion_segundo_parcial").unique().first(),
+                    col("faltas_segundo_parcial").unique().first(),
+                    col("ponderacion_segundo_parcial").unique().first(),
+                    col("calificacion_tercer_parcial").unique().first(),
+                    col("faltas_tercer_parcial").unique().first(),
+                    col("ponderacion_tercer_parcial").unique().first(),
+                ]
+            ).sort(["registro"], Default::default())
+            .collect()?;
+
+        for i in 0..result.height() {
+            let student_id: Option<i32> = crate::schema::students::table
+                .filter(
+                    crate::schema::students::register.eq(result
+                        .column("registro")?
+                        .i32()?
+                        .get(i)
+                        .unwrap()),
+                )
+                .select(crate::schema::students::id)
+                .first::<Option<i32>>(repository.conn)?;
+            let teacher_id: Option<i32> = crate::schema::teachers::table
+                .filter(
+                    crate::schema::teachers::payroll.eq(result
+                        .column("nomina_maestro")?
+                        .i32()?
+                        .get(i)
+                        .unwrap()),
+                )
+                .select(crate::schema::teachers::id)
+                .first::<Option<i32>>(repository.conn)?;
+            let subject_id: Option<i32> = crate::schema::subjects::table
+                .filter(
+                    crate::schema::subjects::code.eq(result
+                        .column("clave")?
+                        .str()?
+                        .get(i)
+                        .unwrap()).and(
+                        crate::schema::subjects::teacher_id.eq(teacher_id.unwrap())
+                    ),
+                )
+                .select(crate::schema::subjects::id)
+                .first::<Option<i32>>(repository.conn)?;
+
+            match repository.create(crate::models::grade::Grade {
+                id: None,
+                student_id,
+                subject_id,
+                first_grade: result.column("calificacion_primer_parcial")?.i32()?.get(i),
+                second_grade: result.column("calificacion_segundo_parcial")?.i32()?.get(i),
+                third_grade: result.column("calificacion_tercer_parcial")?.i32()?.get(i),
+                first_faults: result.column("faltas_primer_parcial")?.i32()?.get(i),
+                second_faults: result.column("faltas_segundo_parcial")?.i32()?.get(i),
+                third_faults: result.column("faltas_tercer_parcial")?.i32()?.get(i),
+                first_weighing: result.column("ponderacion_primer_parcial")?.i32()?.get(i),
+                second_weighing: result.column("ponderacion_segundo_parcial")?.i32()?.get(i),
+                third_weighing: result.column("ponderacion_tercer_parcial")?.i32()?.get(i),
+            }) {
+                Ok(_) => continue,
+                Err(e) => println!("Error creating grade: {:?}", e),
+            }
+        }
+    }
+    if df.clone().schema()?.index_of("calificacion1").is_some() & df.clone().schema()?.index_of("calificacion2").is_some() {
+        let result = df.clone()
+            .lazy()
+            .select(
+                &[
+                    col("registro"),
+                    col("nombre_completo").alias("nombre_alumno"),
+                    col("clave"),
+                    col("nombre_duplicated_0").alias("nombre_materia"),
+                    col("estatus_materia"),
+                    col("nomina").alias("nomina_maestro"),
+                    col("calificacion1").alias("calificacion_primer_parcial"),
+                    col("faltas1").alias("faltas_primer_parcial"),
+                    col("ponderacion1").alias("ponderacion_primer_parcial"),
+                    col("calificacion2").alias("calificacion_segundo_parcial"),
+                    col("faltas2").alias("faltas_segundo_parcial"),
+                    col("ponderacion2").alias("ponderacion_segundo_parcial"),
+                ]
+            )
+            .group_by([col("registro"), col("clave")])
+            .agg(
+                [
+                    col("nombre_alumno").unique().first(),
+                    col("nombre_materia").unique().first(),
+                    col("estatus_materia").unique().first(),
+                    col("nomina_maestro").unique().first(),
+                    col("calificacion_primer_parcial").unique().first(),
+                    col("faltas_primer_parcial").unique().first(),
+                    col("ponderacion_primer_parcial").unique().first(),
+                    col("calificacion_segundo_parcial").unique().first(),
+                    col("faltas_segundo_parcial").unique().first(),
+                    col("ponderacion_segundo_parcial").unique().first(),
+                ]
+            )
+            .sort(["registro"], Default::default())
+            .collect()?;
+
+        for i in 0..result.height() {
+            let student_id: Option<i32> = crate::schema::students::table
+                .filter(
+                    crate::schema::students::register.eq(result
+                        .column("registro")?
+                        .i32()?
+                        .get(i)
+                        .unwrap()),
+                )
+                .select(crate::schema::students::id)
+                .first::<Option<i32>>(repository.conn)?;
+            let teacher_id: Option<i32> = crate::schema::teachers::table
+                .filter(
+                    crate::schema::teachers::payroll.eq(result
+                        .column("nomina_maestro")?
+                        .i32()?
+                        .get(i)
+                        .unwrap()),
+                )
+                .select(crate::schema::teachers::id)
+                .first::<Option<i32>>(repository.conn)?;
+            let subject_id: Option<i32> = crate::schema::subjects::table
+                .filter(
+                    crate::schema::subjects::code.eq(result
+                        .column("clave")?
+                        .str()?
+                        .get(i)
+                        .unwrap()).and(
+                        crate::schema::subjects::teacher_id.eq(teacher_id.unwrap())
+                    ),
+                )
+                .select(crate::schema::subjects::id)
+                .first::<Option<i32>>(repository.conn)?;
+
+            match repository.create(crate::models::grade::Grade {
+                id: None,
+                student_id,
+                subject_id,
+                first_grade: result.column("calificacion_primer_parcial")?.i32()?.get(i),
+                second_grade: result.column("calificacion_segundo_parcial")?.i32()?.get(i),
+                third_grade: None,
+                first_faults: result.column("faltas_primer_parcial")?.i32()?.get(i),
+                second_faults: result.column("faltas_segundo_parcial")?.i32()?.get(i),
+                third_faults: None,
+                first_weighing: result.column("ponderacion_primer_parcial")?.i32()?.get(i),
+                second_weighing: result.column("ponderacion_segundo_parcial")?.i32()?.get(i),
+                third_weighing: None,
+            }) {
+                Ok(_) => continue,
+                Err(e) => println!("Error creating grade: {:?}", e),
+            }
+        }
+    }
+    if df.clone().schema()?.index_of("calificacion1").is_some() {
+        let result = df.clone()
+            .lazy()
+            .select(
+                &[
+                    col("registro"),
+                    col("nombre_completo").alias("nombre_alumno"),
+                    col("clave"),
+                    col("nombre_duplicated_0").alias("nombre_materia"),
+                    col("estatus_materia"),
+                    col("nomina").alias("nomina_maestro"),
+                    col("calificacion1").alias("calificacion_primer_parcial"),
+                    col("faltas1").alias("faltas_primer_parcial"),
+                    col("ponderacion1").alias("ponderacion_primer_parcial"),
+                ]
+            )
+            .group_by([col("registro"), col("clave")])
+            .agg(
+                [
+                    col("nombre_alumno").unique().first(),
+                    col("nombre_materia").unique().first(),
+                    col("estatus_materia").unique().first(),
+                    col("nomina_maestro").unique().first(),
+                    col("calificacion_primer_parcial").unique().first(),
+                    col("faltas_primer_parcial").unique().first(),
+                    col("ponderacion_primer_parcial").unique().first(),
+                ]
+            )
+            .sort(["registro"], Default::default())
+            .collect()?;
+
+        for i in 0..result.height() {
+            let student_id: Option<i32> = crate::schema::students::table
+                .filter(
+                    crate::schema::students::register.eq(result
+                        .column("registro")?
+                        .i32()?
+                        .get(i)
+                        .unwrap()),
+                )
+                .select(crate::schema::students::id)
+                .first::<Option<i32>>(repository.conn)?;
+            let teacher_id: Option<i32> = crate::schema::teachers::table
+                .filter(
+                    crate::schema::teachers::payroll.eq(result
+                        .column("nomina_maestro")?
+                        .i32()?
+                        .get(i)
+                        .unwrap()),
+                )
+                .select(crate::schema::teachers::id)
+                .first::<Option<i32>>(repository.conn)?;
+            let subject_id: Option<i32> = crate::schema::subjects::table
+                .filter(
+                    crate::schema::subjects::code.eq(result
+                        .column("clave")?
+                        .str()?
+                        .get(i)
+                        .unwrap()).and(
+                        crate::schema::subjects::teacher_id.eq(teacher_id.unwrap())
+                    ),
+                )
+                .select(crate::schema::subjects::id)
+                .first::<Option<i32>>(repository.conn)?;
+
+            match repository.create(crate::models::grade::Grade {
+                id: None,
+                student_id,
+                subject_id,
+                first_grade: result.column("calificacion_primer_parcial")?.i32()?.get(i),
+                second_grade: None,
+                third_grade: None,
+                first_faults: result.column("faltas_primer_parcial")?.i32()?.get(i),
+                second_faults: None,
+                third_faults: None,
+                first_weighing: result.column("ponderacion_primer_parcial")?.i32()?.get(i),
+                second_weighing: None,
+                third_weighing: None,
+            }) {
+                Ok(_) => continue,
+                Err(e) => println!("Error creating grade: {:?}", e),
+            }
+        }
+    } else {
+        let result = df.clone()
+            .lazy()
+            .select(
+                &[
+                    col("registro"),
+                    col("nombre_completo").alias("nombre_alumno"),
+                    col("clave"),
+                    col("nombre_duplicated_0").alias("nombre_materia"),
+                    col("estatus_materia"),
+                    col("nomina").alias("nomina_maestro"),
+                ]
+            )
+            .group_by([col("registro"), col("clave")])
+            .agg(
+                [
+                    col("nombre_alumno").unique().first(),
+                    col("nombre_materia").unique().first(),
+                    col("estatus_materia").unique().first(),
+                    col("nomina_maestro").unique().first(),
+                ]
+            )
+            .sort(["registro"], Default::default())
+            .collect()?;
+
+        for i in 0..result.height() {
+            let student_id: Option<i32> = crate::schema::students::table
+                .filter(
+                    crate::schema::students::register.eq(result
+                        .column("registro")?
+                        .i32()?
+                        .get(i)
+                        .unwrap()),
+                )
+                .select(crate::schema::students::id)
+                .first::<Option<i32>>(repository.conn)?;
+            let teacher_id: Option<i32> = crate::schema::teachers::table
+                .filter(
+                    crate::schema::teachers::payroll.eq(result
+                        .column("nomina_maestro")?
+                        .i32()?
+                        .get(i)
+                        .unwrap()),
+                )
+                .select(crate::schema::teachers::id)
+                .first::<Option<i32>>(repository.conn)?;
+            let subject_id: Option<i32> = crate::schema::subjects::table
+                .filter(
+                    crate::schema::subjects::code.eq(result
+                        .column("clave")?
+                        .str()?
+                        .get(i)
+                        .unwrap()).and(
+                        crate::schema::subjects::teacher_id.eq(teacher_id.unwrap())
+                    ),
+                )
+                .select(crate::schema::subjects::id)
+                .first::<Option<i32>>(repository.conn)?;
+
+            match repository.create(crate::models::grade::Grade {
+                id: None,
+                student_id,
+                subject_id,
+                first_grade: None,
+                second_grade: None,
+                third_grade: None,
+                first_faults: None,
+                second_faults: None,
+                third_faults: None,
+                first_weighing: None,
+                second_weighing: None,
+                third_weighing: None,
+            }) {
+                Ok(_) => continue,
+                Err(e) => println!("Error creating grade: {:?}", e),
+            }
         }
     }
 

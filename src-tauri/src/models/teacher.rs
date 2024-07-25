@@ -6,15 +6,15 @@ use serde::{Deserialize, Serialize};
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct Teacher {
     pub id: Option<i32>,
-    pub payfoll: Option<i32>,
+    pub payroll: Option<i32>,
     pub name: Option<String>,
 }
 
 impl Teacher {
-    pub fn new(payfoll: i32, name: String) -> Self {
+    pub fn new(payroll: i32, name: String) -> Self {
         Teacher {
             id: None,
-            payfoll: Some(payfoll),
+            payroll: Some(payroll),
             name: Some(name),
         }
     }
@@ -30,6 +30,6 @@ pub struct Filter {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct TeacherFilters {
     pub id: Option<Filter>,
-    pub payfoll: Option<Filter>,
+    pub payroll: Option<Filter>,
     pub name: Option<Filter>,
 }

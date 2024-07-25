@@ -4,7 +4,7 @@ diesel::table! {
     divisions (id) {
         id -> Nullable<Integer>,
         code -> Nullable<Integer>,
-        academy -> Nullable<Text>,
+        name -> Nullable<Text>,
     }
 }
 
@@ -13,10 +13,15 @@ diesel::table! {
         id -> Nullable<Integer>,
         student_id -> Nullable<Integer>,
         subject_id -> Nullable<Integer>,
-        floults -> Nullable<Integer>,
-        value -> Nullable<Float>,
-        weighing -> Nullable<Integer>,
-        partial -> Nullable<Integer>,
+        first_grade -> Nullable<Integer>,
+        second_grade -> Nullable<Integer>,
+        third_grade -> Nullable<Integer>,
+        first_faults -> Nullable<Integer>,
+        second_faults -> Nullable<Integer>,
+        third_faults -> Nullable<Integer>,
+        first_weighing -> Nullable<Integer>,
+        second_weighing -> Nullable<Integer>,
+        third_weighing -> Nullable<Integer>,
     }
 }
 
@@ -57,7 +62,7 @@ diesel::table! {
 diesel::table! {
     teachers (id) {
         id -> Nullable<Integer>,
-        payfoll -> Nullable<Integer>,
+        payroll -> Nullable<Integer>,
         name -> Nullable<Text>,
     }
 }

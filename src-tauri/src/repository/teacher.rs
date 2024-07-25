@@ -80,7 +80,7 @@ impl Repository<Teacher> for TeacherRepository<'_> {
                 }
             }
         }
-        if let Some(filter) = teacher_filters.payfoll {
+        if let Some(filter) = teacher_filters.payroll {
             if let Some(value) = filter.value {
                 match filter.match_mode.as_str() {
                     "startsWith" => {

@@ -3,6 +3,7 @@ pub mod subject;
 pub mod teacher;
 pub mod speciality;
 pub mod student;
+pub mod grade;
 
 pub trait Repository<T> {
     fn count(&mut self) -> Result<i64, Box<dyn std::error::Error>>;

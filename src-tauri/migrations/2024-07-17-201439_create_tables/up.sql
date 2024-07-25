@@ -9,7 +9,7 @@ CREATE TABLE students (
   semester INTEGER,
   `group` TEXT,
   turn TEXT,
-  level TEXT,
+  `level` TEXT,
   FOREIGN KEY(speciality_id) REFERENCES specialities(id)
 );
 CREATE TABLE specialities (
@@ -29,21 +29,26 @@ CREATE TABLE subjects (
 CREATE TABLE divisions (
   id INTEGER PRIMARY KEY,
   code INTEGER,
-  academy TEXT
+  name TEXT
 );
 CREATE TABLE teachers (
   id INTEGER PRIMARY KEY,
-  payfoll INTEGER,
+  payroll INTEGER,
   name TEXT
 );
 CREATE TABLE grades (
   id INTEGER PRIMARY KEY,
   student_id INTEGER,
   subject_id INTEGER,
-  floults INTEGER,
-  value REAL,
-  weighing INTEGER,
-  partial INTEGER,
+  first_grade INTEGER,
+  second_grade INTEGER,
+  third_grade INTEGER,
+  first_faults INTEGER,
+  second_faults INTEGER,
+  third_faults INTEGER,
+  first_weighing INTEGER,
+  second_weighing INTEGER,
+  third_weighing INTEGER,
   FOREIGN KEY(student_id) REFERENCES students(id),
   FOREIGN KEY(subject_id) REFERENCES subjects(id)
 );
