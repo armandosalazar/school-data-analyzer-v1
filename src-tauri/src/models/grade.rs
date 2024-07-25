@@ -1,7 +1,7 @@
 use diesel::prelude::*;
 
-#[derive(Insertable, Queryable)]
-#[diesel(table_name = create::schema::grades)]
+#[derive(Insertable, Queryable, Identifiable)]
+#[diesel(table_name = crate::schema::grades)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct Grade {
     pub id: Option<i32>,

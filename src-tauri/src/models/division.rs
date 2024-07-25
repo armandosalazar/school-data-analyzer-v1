@@ -6,15 +6,15 @@ use diesel::prelude::*;
 pub struct Division {
     id: Option<i32>,
     code: Option<i32>,
-    academy: Option<String>,
+    name: Option<String>,
 }
 
 impl Division {
-    pub fn new(code: i32, academy: String) -> Self {
+    pub fn new(code: i32, name: String) -> Self {
         Division {
             id: None,
             code: Some(code),
-            academy: Some(academy),
+            name: Some(name),
         }
     }
 }

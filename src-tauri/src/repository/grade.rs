@@ -8,8 +8,8 @@ pub struct GradeRepository<'a> {
     pub conn: &'a mut SqliteConnection,
 }
 
-impl GradeRepository<'_> {
-    pub fn new(conn: &mut SqliteConnection) -> Self {
+impl<'a> GradeRepository<'a> {
+    pub fn new(conn: &'a mut SqliteConnection) -> Self {
         GradeRepository { conn }
     }
 }

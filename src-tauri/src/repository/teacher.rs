@@ -85,7 +85,7 @@ impl Repository<Teacher> for TeacherRepository<'_> {
                 match filter.match_mode.as_str() {
                     "startsWith" => {
                         query =
-                            query.filter(crate::schema::teachers::payfoll.eq(value.parse::<i32>()?))
+                            query.filter(crate::schema::teachers::payroll.eq(value.parse::<i32>()?))
                     }
                     _ => {}
                 }

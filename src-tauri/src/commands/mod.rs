@@ -1,6 +1,5 @@
 use diesel::prelude::*;
 use polars::prelude::*;
-use serde::de::Error;
 use crate::database;
 use crate::models::division::Division;
 use crate::models::subject::Subject;
@@ -23,6 +22,15 @@ pub fn upload_file(path: &str) {
     schema.with_column("especialidad".into(), DataType::Int32);
     schema.with_column("registro".into(), DataType::Int32);
     schema.with_column("semestre".into(), DataType::Int32);
+    schema.with_column("calificacion1".into(), DataType::Int32);
+    schema.with_column("calificacion2".into(), DataType::Int32);
+    schema.with_column("calificacion3".into(), DataType::Int32);
+    schema.with_column("faltas1".into(), DataType::Int32);
+    schema.with_column("faltas2".into(), DataType::Int32);
+    schema.with_column("faltas3".into(), DataType::Int32);
+    schema.with_column("ponderacion1".into(), DataType::Int32);
+    schema.with_column("ponderacion2".into(), DataType::Int32);
+    schema.with_column("ponderacion3".into(), DataType::Int32);
 
     let df: LazyFrame = LazyCsvReader::new(path)
         .with_dtype_overwrite(Some(Arc::new(schema)))
