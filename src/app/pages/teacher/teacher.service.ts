@@ -20,11 +20,15 @@ export class TeacherService {
   async getTeachers(
     offset: number,
     pageSize: number,
+    sortField: string,
+    sortOrder: number,
     filters: object
   ): Promise<Teacher[]> {
     return await invoke<Teacher[]>('get_teachers', {
       offset,
       pageSize,
+      sortOrder,
+      sortField,
       filters: JSON.stringify(filters),
     });
   }

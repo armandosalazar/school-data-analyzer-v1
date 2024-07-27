@@ -1,3 +1,4 @@
+use std::error::Error;
 use diesel::prelude::*;
 
 use super::Repository;
@@ -26,12 +27,7 @@ impl Repository<Division> for DivisionRepository<'_> {
         Ok(division)
     }
 
-    fn find_all(
-        &mut self,
-        offset: Option<i64>,
-        page_size: Option<i64>,
-        filters: Option<String>,
-    ) -> Result<Vec<Division>, Box<dyn std::error::Error>> {
+    fn find_all(&mut self, offset: Option<i64>, page_size: Option<i64>, sort_field: Option<String>, sort_order: Option<i64>, filters: Option<String>) -> Result<Vec<Division>, Box<dyn Error>> {
         todo!()
     }
 }

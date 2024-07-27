@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { TableModule } from 'primeng/table';
 import { TeacherService } from './teacher.service';
 import { IconFieldModule } from 'primeng/iconfield';
@@ -32,6 +32,7 @@ export class TeacherComponent {
   };
 
   async loadTeachers(event: any) {
+    console.log(event);
     if (
       _.isEqual(event.filters, this.emptyFilters) ||
       _.isEmpty(event.filters)
@@ -39,6 +40,8 @@ export class TeacherComponent {
       this.teachers = await this.teacherService.getTeachers(
         event.first,
         event.rows,
+        event.sortField,
+        event.sortOrder,
         event.filters
       );
       this.totalRecords = await this.teacherService.countTeachers();
@@ -46,6 +49,8 @@ export class TeacherComponent {
       this.teachers = await this.teacherService.getTeachers(
         event.first,
         event.rows,
+        event.sortField,
+        event.sortOrder,
         event.filters
       );
       this.totalRecords = this.teachers.length;

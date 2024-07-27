@@ -1,3 +1,4 @@
+use std::error::Error;
 use diesel::prelude::*;
 
 use crate::models::subject::Subject;
@@ -19,20 +20,15 @@ impl Repository<Subject> for SubjectRepository<'_> {
         todo!()
     }
 
-    fn find_all(
-        &mut self,
-        offset: Option<i64>,
-        page_size: Option<i64>,
-        filters: Option<String>,
-    ) -> Result<Vec<Subject>, Box<dyn std::error::Error>> {
-        todo!()
-    }
-
     fn create(&mut self, entity: Subject) -> Result<Subject, Box<dyn std::error::Error>> {
         let subject = diesel::insert_into(crate::schema::subjects::table)
             .values(&entity)
             .get_result(self.conn)?;
 
         Ok(subject)
+    }
+
+    fn find_all(&mut self, offset: Option<i64>, page_size: Option<i64>, sort_field: Option<String>, sort_order: Option<i64>, filters: Option<String>) -> Result<Vec<Subject>, Box<dyn Error>> {
+        todo!()
     }
 }
