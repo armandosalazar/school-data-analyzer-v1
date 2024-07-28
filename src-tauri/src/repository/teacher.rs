@@ -98,24 +98,24 @@ impl Repository<Teacher> for TeacherRepository<'_> {
             }
         }
 
-        match sort_field.as_deref() {
-            Some("id") => query = match sort_order.unwrap() {
-                1 => query.order(crate::schema::teachers::id.asc()),
-                -1 => query.order(crate::schema::teachers::id.desc()),
-                _ => query,
-            },
-            Some("name") => query = match sort_order.unwrap() {
-                1 => query.order(crate::schema::teachers::name.asc()),
-                -1 => query.order(crate::schema::teachers::name.desc()),
-                _ => query,
-            },
-            Some("payroll") => query = match sort_order.unwrap() {
-                1 => query.order(crate::schema::teachers::payroll.asc()),
-                -1 => query.order(crate::schema::teachers::payroll.desc()),
-                _ => query,
-            },
-            _ => {}
-        };
+        // match sort_field.as_deref() {
+        //     Some("id") => query = match sort_order.unwrap() {
+        //         1 => query.order(crate::schema::teachers::id.asc()),
+        //         -1 => query.order(crate::schema::teachers::id.desc()),
+        //         _ => query,
+        //     },
+        //     Some("name") => query = match sort_order.unwrap() {
+        //         1 => query.order(crate::schema::teachers::name.asc()),
+        //         -1 => query.order(crate::schema::teachers::name.desc()),
+        //         _ => query,
+        //     },
+        //     Some("payroll") => query = match sort_order.unwrap() {
+        //         1 => query.order(crate::schema::teachers::payroll.asc()),
+        //         -1 => query.order(crate::schema::teachers::payroll.desc()),
+        //         _ => query,
+        //     },
+        //     _ => {}
+        // };
 
         let teachers = query
             .limit(page_size.unwrap())
