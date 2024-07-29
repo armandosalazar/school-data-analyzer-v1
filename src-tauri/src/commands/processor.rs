@@ -5,11 +5,11 @@ use crate::models::subject::Subject;
 use crate::models::teacher::Teacher;
 use crate::repository::Repository;
 
-pub fn crate_teachers(
-    df: &LazyFrame,
-    repository: &mut crate::repository::teacher::TeacherRepository<'_>,
+pub async fn create_teachers(
+    lf: &LazyFrame,
+    conn: &mut SqliteConnection,
 ) -> Result<String, Box<dyn std::error::Error>> {
-    let teachers = df
+    let teachers = lf
         .clone()
         .lazy()
         .select(&[
@@ -24,6 +24,8 @@ pub fn crate_teachers(
         .sort(&["payroll"], Default::default())
         .collect()?;
 
+    let mut repository = crate::repository::teacher::TeacherRepository::new(conn);
+
     for i in 0..teachers.height() {
         match repository.create(Teacher::new(
             teachers.column("payroll")?.i32()?.get(i).unwrap(),
@@ -37,11 +39,11 @@ pub fn crate_teachers(
     Ok("Teachers created".to_string())
 }
 
-fn create_divisions(
-    df: &LazyFrame,
-    repository: &mut crate::repository::division::DivisionRepository,
+pub async fn create_divisions(
+    lf: &LazyFrame,
+    conn: &mut SqliteConnection,
 ) -> Result<String, Box<dyn std::error::Error>> {
-    let divisions = df
+    let divisions = lf
         .clone()
         .lazy()
         .select(&[
@@ -53,6 +55,8 @@ fn create_divisions(
         .explode(["name"])
         .sort(["code"], Default::default())
         .collect()?;
+
+    let mut repository = crate::repository::division::DivisionRepository::new(conn);
 
     for i in 0..divisions.height() {
         match repository.create(Division::new(
@@ -67,11 +71,11 @@ fn create_divisions(
     Ok("Divisions created".to_string())
 }
 
-fn create_subjects(
-    df: &LazyFrame,
-    repository: &mut crate::repository::subject::SubjectRepository,
+pub async fn create_subjects(
+    lf: &LazyFrame,
+    conn: &mut SqliteConnection,
 ) -> Result<String, Box<dyn std::error::Error>> {
-    let subjects = df
+    let subjects = lf
         .clone()
         .lazy()
         .select(&[
@@ -82,7 +86,7 @@ fn create_subjects(
             col("nomina").alias("payroll").cast(DataType::Int32),
             col("nombre_duplicated_1").alias("teacher_name"),
         ])
-        .group_by([col("clave"), col("teacher_name")])
+        .group_by([col("code"), col("teacher_name")])
         .agg(vec![
             col("name").unique().first(),
             col("division_code").unique().first(),
@@ -91,6 +95,8 @@ fn create_subjects(
         ])
         .sort(["code"], Default::default())
         .collect()?;
+
+    let mut repository = crate::repository::subject::SubjectRepository::new(conn);
 
     for i in 0..subjects.height() {
         let teacher_id: Option<i32> = crate::schema::teachers::dsl::teachers
@@ -104,6 +110,7 @@ fn create_subjects(
             .or_filter(crate::schema::divisions::name.eq(subjects.column("academy_name")?.str()?.get(i).unwrap()))
             .select(crate::schema::divisions::id)
             .first::<Option<i32>>(repository.conn)?;
+
 
         match repository.create(Subject::new(
             teacher_id.unwrap(),
@@ -119,11 +126,11 @@ fn create_subjects(
     Ok("Subjects created".to_string())
 }
 
-fn create_specialities(
-    df: &LazyFrame,
-    repository: &mut crate::repository::speciality::SpecialityRepository,
+pub async fn create_specialities(
+    lf: &LazyFrame,
+    conn: &mut SqliteConnection,
 ) -> Result<String, Box<dyn std::error::Error>> {
-    let specialities = df
+    let specialities = lf
         .clone()
         .lazy()
         .select(&[
@@ -135,6 +142,8 @@ fn create_specialities(
         .explode(["name"])
         .sort(["code"], Default::default())
         .collect()?;
+
+    let mut repository = crate::repository::speciality::SpecialityRepository::new(conn);
 
     for i in 0..specialities.height() {
         match repository.create(crate::models::speciality::Speciality::new(
@@ -149,11 +158,11 @@ fn create_specialities(
     Ok("Specialities created".to_string())
 }
 
-fn create_students(
-    df: &LazyFrame,
-    repository: &mut crate::repository::student::StudentRepository,
+pub async fn create_students(
+    lf: &LazyFrame,
+    conn: &mut SqliteConnection,
 ) -> Result<String, Box<dyn std::error::Error>> {
-    let students = df
+    let students = lf
         .clone()
         .lazy()
         .select(&[
@@ -168,7 +177,7 @@ fn create_students(
             col("especialidad").alias("speciality_code").cast(DataType::Int32),
             col("nombre").alias("speciality_name"),
         ])
-        .group_by([col("registro")])
+        .group_by([col("register")])
         .agg([
             col("name").unique().first(),
             col("type").unique().first(),
@@ -180,8 +189,10 @@ fn create_students(
             col("speciality_code").unique().first(),
             col("speciality_name").unique().first(),
         ])
-        .sort(["registro"], Default::default())
+        .sort(["register"], Default::default())
         .collect()?;
+
+    let mut repository = crate::repository::student::StudentRepository::new(conn);
 
     for i in 0..students.height() {
         let speciality_id: Option<i32> = crate::schema::specialities::table.filter(crate::schema::specialities::code.eq(students.column("speciality_code")?.i32()?.get(i).unwrap()))
@@ -211,9 +222,8 @@ fn create_students(
 
 pub async fn create_grades(
     lf: &LazyFrame,
-    // repository: &mut crate::repository::grade::GradeRepository,
+    conn: &mut SqliteConnection,
 ) -> Result<String, Box<dyn std::error::Error>> {
-    let mut conn = crate::database::establish_connection();
     let df = lf.clone().limit(0).collect()?;
 
     let column_names = df.get_column_names();
@@ -252,7 +262,6 @@ pub async fn create_grades(
         }
     }
 
-
     println!("{:?}", select_columns);
     let grades = lf
         .clone()
@@ -265,27 +274,28 @@ pub async fn create_grades(
     println!("{:?}", grades);
     println!("{:?}", last_column);
 
+    let mut repository = crate::repository::grade::GradeRepository::new(conn);
+
     match last_column.as_str() {
         "ponderacion1" => {
             for i in 0..grades.height() {
                 let student_id: Option<i32> = get_student_id(
                     grades.column("register")?.i32()?.get(i).unwrap(),
-                    &mut conn,
+                    repository.conn,
                 );
 
                 let teacher_id: Option<i32> = get_teacher_id(
                     grades.column("payroll")?.i32()?.get(i).unwrap(),
-                    &mut conn,
+                    repository.conn,
                 );
 
                 let subject_id: Option<i32> = get_subject_id(
                     grades.column("code")?.str()?.get(i).unwrap(),
                     teacher_id.unwrap(),
-                    &mut conn,
+                    repository.conn,
                 );
 
-
-                match crate::repository::grade::GradeRepository::new(&mut conn).create(crate::models::grade::Grade {
+                match repository.create(crate::models::grade::Grade {
                     id: None,
                     student_id,
                     subject_id,
@@ -308,22 +318,21 @@ pub async fn create_grades(
             for i in 0..grades.height() {
                 let student_id: Option<i32> = get_student_id(
                     grades.column("register")?.i32()?.get(i).unwrap(),
-                    &mut conn,
+                    repository.conn,
                 );
 
                 let teacher_id: Option<i32> = get_teacher_id(
                     grades.column("payroll")?.i32()?.get(i).unwrap(),
-                    &mut conn,
+                    repository.conn,
                 );
 
                 let subject_id: Option<i32> = get_subject_id(
                     grades.column("code")?.str()?.get(i).unwrap(),
                     teacher_id.unwrap(),
-                    &mut conn,
+                    repository.conn,
                 );
 
-
-                match crate::repository::grade::GradeRepository::new(&mut conn).create(crate::models::grade::Grade {
+                match repository.create(crate::models::grade::Grade {
                     id: None,
                     student_id,
                     subject_id,
@@ -346,22 +355,21 @@ pub async fn create_grades(
             for i in 0..grades.height() {
                 let student_id: Option<i32> = get_student_id(
                     grades.column("register")?.i32()?.get(i).unwrap(),
-                    &mut conn,
+                    repository.conn,
                 );
 
                 let teacher_id: Option<i32> = get_teacher_id(
                     grades.column("payroll")?.i32()?.get(i).unwrap(),
-                    &mut conn,
+                    repository.conn,
                 );
 
                 let subject_id: Option<i32> = get_subject_id(
                     grades.column("code")?.str()?.get(i).unwrap(),
                     teacher_id.unwrap(),
-                    &mut conn,
+                    repository.conn,
                 );
 
-
-                match crate::repository::grade::GradeRepository::new(&mut conn).create(crate::models::grade::Grade {
+                match repository.create(crate::models::grade::Grade {
                     id: None,
                     student_id,
                     subject_id,
@@ -384,22 +392,21 @@ pub async fn create_grades(
             for i in 0..grades.height() {
                 let student_id: Option<i32> = get_student_id(
                     grades.column("register")?.i32()?.get(i).unwrap(),
-                    &mut conn,
+                    repository.conn,
                 );
 
                 let teacher_id: Option<i32> = get_teacher_id(
                     grades.column("payroll")?.i32()?.get(i).unwrap(),
-                    &mut conn,
+                    repository.conn,
                 );
 
                 let subject_id: Option<i32> = get_subject_id(
                     grades.column("code")?.str()?.get(i).unwrap(),
                     teacher_id.unwrap(),
-                    &mut conn,
+                    repository.conn,
                 );
 
-
-                match crate::repository::grade::GradeRepository::new(&mut conn).create(crate::models::grade::Grade {
+                match repository.create(crate::models::grade::Grade {
                     id: None,
                     student_id,
                     subject_id,
@@ -428,18 +435,18 @@ fn get_student_id(register: i32, conn: &mut SqliteConnection) -> Option<i32> {
     crate::schema::students::table
         .filter(crate::schema::students::register.eq(register))
         .select(crate::schema::students::id)
-        .first::<Option<i32>>(conn)?
+        .first::<Option<i32>>(conn).ok()?
 }
 fn get_teacher_id(payroll: i32, conn: &mut SqliteConnection) -> Option<i32> {
     crate::schema::teachers::table
         .filter(crate::schema::teachers::payroll.eq(payroll))
         .select(crate::schema::teachers::id)
-        .first::<Option<i32>>(conn)?
+        .first::<Option<i32>>(conn).ok()?
 }
 
 fn get_subject_id(code: &str, teacher_id: i32, conn: &mut SqliteConnection) -> Option<i32> {
     crate::schema::subjects::table
         .filter(crate::schema::subjects::code.eq(code).and(crate::schema::subjects::teacher_id.eq(teacher_id)))
         .select(crate::schema::subjects::id)
-        .first::<Option<i32>>(conn)?
+        .first::<Option<i32>>(conn).ok()?
 }

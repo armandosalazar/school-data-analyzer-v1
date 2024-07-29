@@ -9,9 +9,10 @@ mod schema;
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
-            commands::upload_file,
-            commands::teacher::count_teachers,
-            commands::teacher::get_teachers
+            commands::file::upload_file,
+            // commands::upload_file,
+            // commands::teacher::count_teachers,
+            // commands::teacher::get_teachers
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

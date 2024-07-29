@@ -37,7 +37,7 @@ export class DashboardComponent {
 
   files: File[] = [];
   path: string = "";
-  processing: boolean = true;
+  processing: boolean = false;
 
   uploadFile(): void {
     open({
@@ -49,17 +49,19 @@ export class DashboardComponent {
         },
       ],
     }).then((selected) => {
+      this.processing = true;
       if (!selected) {
         this.messageService.add({
           severity: "error",
           summary: "Error",
           detail: "No file selected",
         });
+        this.processing = false;
         return;
       }
-      this.processing = true;
       this.dashboardService.uploadFile(selected?.toString() ?? "").subscribe({
         next: (response: Response) => {
+          this.processing = false;
           this.messageService.add({
             severity: "success",
             summary: "Success",
@@ -67,6 +69,7 @@ export class DashboardComponent {
           });
         },
         error: (error: Response) => {
+          this.processing = false;
           this.messageService.add({
             severity: "error",
             summary: "Error",
@@ -74,7 +77,6 @@ export class DashboardComponent {
           });
         },
       });
-      this.processing = false;
     });
   }
 }
