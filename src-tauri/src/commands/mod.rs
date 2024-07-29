@@ -1,4 +1,6 @@
+use std::error::Error;
 use diesel::prelude::*;
+use futures::StreamExt;
 use polars::prelude::*;
 use crate::database;
 use crate::models::division::Division;
@@ -39,18 +41,10 @@ pub async fn upload_file(path: &str) -> Result<String, String> {
 
     let mut conn = database::establish_connection();
 
-    let handle = tokio::spawn(async {
-        match create_teachers(&df, &mut TeacherRepository::new(&mut conn)).await {
-            Ok(_) => println!("Teachers created successfully"),
-            Err(e) => println!("Error creating teachers: {:?}", e),
-        }
-    });
-
-    match handle.await {
+    match create_teachers(&df, &mut TeacherRepository::new(&mut conn)) {
         Ok(_) => println!("Teachers created successfully"),
         Err(e) => println!("Error creating teachers: {:?}", e),
     }
-
     match create_divisions(&df, &mut DivisionRepository::new(&mut conn)) {
         Ok(_) => println!("Divisions created successfully"),
         Err(e) => println!("Error creating divisions: {:?}", e),
@@ -71,12 +65,13 @@ pub async fn upload_file(path: &str) -> Result<String, String> {
         Ok(_) => println!("Grades created successfully"),
         Err(e) => println!("Error creating grades: {:?}", e),
     }
+    Ok("File uploaded successfully".to_string())
 }
 
 #[allow(dead_code)]
-async fn create_teachers(
+fn create_teachers(
     df: &LazyFrame,
-    repository: &mut TeacherRepository,
+    repository: &mut TeacherRepository<'_>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let result = df
         .clone()
@@ -91,7 +86,7 @@ async fn create_teachers(
         match repository.create(Teacher::new(
             result.column("nomina")?.i32()?.get(i).unwrap(),
             result.column("nombre")?.str()?.get(i).unwrap().to_string(),
-        )).await {
+        )) {
             Ok(_) => continue,
             Err(e) => println!("Error creating teacher: {:?}", e),
         }
@@ -101,7 +96,7 @@ async fn create_teachers(
 }
 
 #[allow(dead_code)]
-async fn create_divisions(
+fn create_divisions(
     df: &LazyFrame,
     repository: &mut DivisionRepository,
 ) -> Result<(), Box<dyn std::error::Error>> {
@@ -124,7 +119,7 @@ async fn create_divisions(
                 .get(i)
                 .unwrap()
                 .to_string(),
-        )).await {
+        )) {
             Ok(_) => continue,
             Err(e) => println!("Error creating division: {:?}", e),
         }
@@ -134,7 +129,7 @@ async fn create_divisions(
 }
 
 #[allow(dead_code)]
-async fn create_subjects(
+fn create_subjects(
     df: &LazyFrame,
     repository: &mut SubjectRepository,
 ) -> Result<(), Box<dyn std::error::Error>> {
@@ -201,7 +196,7 @@ async fn create_subjects(
             division_id.unwrap(),
             result.column("clave")?.str()?.get(i).unwrap().to_string(),
             result.column("nombre")?.str()?.get(i).unwrap().to_string(),
-        )).await {
+        )) {
             Ok(_) => continue,
             Err(e) => println!("Error creating subject: {:?}", e),
         }

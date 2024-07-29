@@ -3,7 +3,7 @@ import { invoke } from '@tauri-apps/api';
 
 interface Teacher {
   id: number;
-  payfoll: number;
+  payroll: number;
   name: string;
 }
 

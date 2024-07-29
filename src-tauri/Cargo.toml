@@ -19,6 +19,7 @@ chrono = "0.4.38"
 dotenvy = "0.15.7"
 polars = { version = "0.41.3", features = ["lazy"] }
 tokio = { version = "1.39.2", features = ["full"] }
+futures = "0.3.30"
 
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!

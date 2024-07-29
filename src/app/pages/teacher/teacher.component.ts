@@ -9,7 +9,7 @@ import _ from 'lodash';
 
 interface Teacher {
   id: number;
-  payfoll: number;
+  payroll: number;
   name: string;
 }
 
@@ -21,13 +21,13 @@ interface Teacher {
   styleUrl: './teacher.component.css',
 })
 export class TeacherComponent {
-  teacherService = inject(TeacherService);
+  teacherService: TeacherService = inject(TeacherService);
   totalRecords: number = 0;
   teachers: Teacher[] = [];
   modeOptions: SelectItem[] = [{ label: 'Equals', value: 'equals' }];
   emptyFilters: object = {
     id: { value: null, matchMode: 'startsWith' },
-    payfoll: { value: null, matchMode: 'startsWith' },
+    payroll: { value: null, matchMode: 'startsWith' },
     name: { value: null, matchMode: 'startsWith' },
   };
 
