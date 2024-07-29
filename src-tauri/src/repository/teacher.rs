@@ -11,6 +11,7 @@ impl<'a> TeacherRepository<'a> {
     pub fn new(conn: &'a mut SqliteConnection) -> Self {
         TeacherRepository { conn }
     }
+
 }
 
 impl Repository<Teacher> for TeacherRepository<'_> {
@@ -38,7 +39,6 @@ impl Repository<Teacher> for TeacherRepository<'_> {
         sort_order: Option<i64>,
         filters: Option<String>,
     ) -> Result<Vec<Teacher>, Box<dyn std::error::Error>> {
-
         let teacher_filters: crate::models::teacher::TeacherFilters =
             serde_json::from_str::<crate::models::teacher::TeacherFilters>(
                 filters.unwrap().as_str(),

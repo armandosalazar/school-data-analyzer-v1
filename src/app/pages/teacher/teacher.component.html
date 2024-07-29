@@ -9,15 +9,18 @@
   styleClass="p-datatable-sm"
 >
   <!-- <ng-template pTemplate="caption">
-    <p-iconField>
-      <p-inputIcon> <i class="pi pi-search"></i> </p-inputIcon>
-      <input pInputText type="text" />
-    </p-iconField>
-  </ng-template> -->
+      <p-iconField>
+        <p-inputIcon> <i class="pi pi-search"></i> </p-inputIcon>
+        <input pInputText type="text" />
+      </p-iconField>
+    </ng-template> -->
   <ng-template pTemplate="header">
     <tr>
-      <th pSortableColumn="id">Id <p-sortIcon field="id"></p-sortIcon></th>
-      <th>Payfoll</th>
+      <th pSortableColumn="id">
+        Id
+        <p-sortIcon field="id"></p-sortIcon>
+      </th>
+      <th>Payroll</th>
       <th>Name</th>
     </tr>
     <tr>
@@ -33,9 +36,9 @@
       <th>
         <p-columnFilter
           type="text"
-          field="payfoll"
-          placeholder="Seach by Payfoll"
-          ariaLabel="Filter by Payfoll"
+          field="payroll"
+          placeholder="Seach by Payroll"
+          ariaLabel="Filter by Payroll"
           [matchModeOptions]="modeOptions"
         ></p-columnFilter>
       </th>
@@ -52,7 +55,7 @@
   <ng-template pTemplate="body" let-teacher>
     <tr>
       <td>{{ teacher.id }}</td>
-      <td>{{ teacher.payfoll }}</td>
+      <td>{{ teacher.payroll }}</td>
       <td>{{ teacher.name }}</td>
     </tr>
   </ng-template>
