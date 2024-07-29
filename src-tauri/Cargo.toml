@@ -18,6 +18,7 @@ diesel = { version = "2.2.1", features = ["sqlite", "chrono", "returning_clauses
 chrono = "0.4.38"
 dotenvy = "0.15.7"
 polars = { version = "0.41.3", features = ["lazy"] }
+tokio = { version = "1.39.2", features = ["full"] }
 
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!

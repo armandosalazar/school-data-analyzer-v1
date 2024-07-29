@@ -15,7 +15,7 @@ use crate::repository::student::StudentRepository;
 pub mod teacher;
 
 #[tauri::command]
-pub fn upload_file(path: &str) {
+pub async fn upload_file(path: &str) -> Result<String, String> {
     let mut schema: Schema = Schema::new();
     schema.with_column("nomina".into(), DataType::Int32);
     schema.with_column("division".into(), DataType::Int32);
@@ -39,10 +39,18 @@ pub fn upload_file(path: &str) {
 
     let mut conn = database::establish_connection();
 
-    match create_teachers(&df, &mut TeacherRepository::new(&mut conn)) {
+    let handle = tokio::spawn(async {
+        match create_teachers(&df, &mut TeacherRepository::new(&mut conn)).await {
+            Ok(_) => println!("Teachers created successfully"),
+            Err(e) => println!("Error creating teachers: {:?}", e),
+        }
+    });
+
+    match handle.await {
         Ok(_) => println!("Teachers created successfully"),
         Err(e) => println!("Error creating teachers: {:?}", e),
     }
+
     match create_divisions(&df, &mut DivisionRepository::new(&mut conn)) {
         Ok(_) => println!("Divisions created successfully"),
         Err(e) => println!("Error creating divisions: {:?}", e),
@@ -66,7 +74,7 @@ pub fn upload_file(path: &str) {
 }
 
 #[allow(dead_code)]
-fn create_teachers(
+async fn create_teachers(
     df: &LazyFrame,
     repository: &mut TeacherRepository,
 ) -> Result<(), Box<dyn std::error::Error>> {
@@ -83,7 +91,7 @@ fn create_teachers(
         match repository.create(Teacher::new(
             result.column("nomina")?.i32()?.get(i).unwrap(),
             result.column("nombre")?.str()?.get(i).unwrap().to_string(),
-        )) {
+        )).await {
             Ok(_) => continue,
             Err(e) => println!("Error creating teacher: {:?}", e),
         }
@@ -93,7 +101,7 @@ fn create_teachers(
 }
 
 #[allow(dead_code)]
-fn create_divisions(
+async fn create_divisions(
     df: &LazyFrame,
     repository: &mut DivisionRepository,
 ) -> Result<(), Box<dyn std::error::Error>> {
@@ -116,7 +124,7 @@ fn create_divisions(
                 .get(i)
                 .unwrap()
                 .to_string(),
-        )) {
+        )).await {
             Ok(_) => continue,
             Err(e) => println!("Error creating division: {:?}", e),
         }
@@ -126,7 +134,7 @@ fn create_divisions(
 }
 
 #[allow(dead_code)]
-fn create_subjects(
+async fn create_subjects(
     df: &LazyFrame,
     repository: &mut SubjectRepository,
 ) -> Result<(), Box<dyn std::error::Error>> {
@@ -193,7 +201,7 @@ fn create_subjects(
             division_id.unwrap(),
             result.column("clave")?.str()?.get(i).unwrap().to_string(),
             result.column("nombre")?.str()?.get(i).unwrap().to_string(),
-        )) {
+        )).await {
             Ok(_) => continue,
             Err(e) => println!("Error creating subject: {:?}", e),
         }
