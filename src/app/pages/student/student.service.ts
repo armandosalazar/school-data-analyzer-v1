@@ -8,6 +8,25 @@ export interface Student {
   name: string;
 }
 
+export interface Grade {
+  id: number;
+  firstGrade: number;
+  firstFaults: number;
+  firstWeighing: number;
+  secondGrade: number;
+  secondFaults: number;
+  secondWeighing: number;
+  thirdGrade: number;
+  thirdFaults: number;
+  thirdWeighing: number;
+  subjectCode: string;
+  subjectName: string;
+  teacherPayroll: number;
+  teacherName: string;
+  divisionCode: number;
+  divisionName: string;
+}
+
 @Injectable({
   providedIn: "root",
 })
@@ -20,5 +39,9 @@ export class StudentService {
 
   countStudents(): Observable<number> {
     return from(invoke<number>("count_students"));
+  }
+
+  getGradesByStudentId(studentId: number): Observable<Grade[]> {
+    return from(invoke<Grade[]>("get_grades_by_student_id", { studentId }));
   }
 }

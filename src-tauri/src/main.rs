@@ -16,6 +16,7 @@ fn main() {
             upload_file,
             get_students,
             commands::student::count_students,
+            commands::student::get_grades_by_student_id,
             count_teachers,
             get_teachers
         ])

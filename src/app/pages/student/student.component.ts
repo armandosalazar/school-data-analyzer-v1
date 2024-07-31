@@ -1,5 +1,5 @@
 import { Component, inject } from "@angular/core";
-import { StudentService, Student } from "./student.service";
+import { StudentService, Student, Grade } from "./student.service";
 import {
   TableModule,
   TableRowCollapseEvent,
@@ -21,6 +21,7 @@ export class StudentComponent {
   students: Student[] = [];
   totalRecords: number = 10;
   expandedRows = {};
+  studentGrades: Grade[] = [];
 
   loadStudents(event: any): void {
     console.log(JSON.stringify(event));
@@ -37,6 +38,12 @@ export class StudentComponent {
 
   onRowExpand(event: TableRowExpandEvent) {
     console.log(event);
+    this.studentService
+      .getGradesByStudentId(event.data.id)
+      .subscribe((data) => {
+        this.studentGrades = data;
+        console.log(data);
+      });
   }
 
   onRowCollapse(event: TableRowCollapseEvent) {
