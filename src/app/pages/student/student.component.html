@@ -1,3 +1,58 @@
-<p>student works!</p>
-<button (click)="getStudents()">Get Teachers</button>
-<p>{{ students }}</p>
+<p-table
+        [value]="students"
+        [paginator]="true"
+        [rows]="10"
+        [lazy]="true"
+        (onLazyLoad)="loadStudents($event)"
+        [totalRecords]="totalRecords"
+        [rowsPerPageOptions]="[5, 10, 20]"
+        dataKey="id"
+        [expandedRowKeys]="expandedRows"
+        (onRowExpand)="onRowExpand($event)"
+        (onRowCollapse)="onRowCollapse($event)"
+        styleClass="p-datatable-sm"
+>
+    <ng-template pTemplate="header">
+        <tr>
+            <th></th>
+            <th>Id</th>
+            <th>Register</th>
+            <th>Name</th>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-student let-expanded="expanded">
+        <tr>
+            <td>
+                <p-button
+                        type="button"
+                        pRipple [pRowToggler]="student"
+                        [text]="true"
+                        [rounded]="true"
+                        [plain]="true"
+                        [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
+                />
+            </td>
+            <td>{{ student.id }}</td>
+            <td>{{ student.register }}</td>
+            <td>{{ student.name }}</td>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="rowexpansion" let-student>
+        <div class="p-grid p-dir-col">
+            <tr>
+                <td>{{ student.id }}</td>
+                <td>{{ student.register }}</td>
+                <td>{{ student.name }}</td>
+            </tr>
+            <div class="p-col">
+                <b>Id:</b> {{ student.id }}
+            </div>
+            <div class="p-col">
+                <b>Register:</b> {{ student.register }}
+            </div>
+            <div class="p-col">
+                <b>Name:</b> {{ student.name }}
+            </div>
+        </div>
+    </ng-template>
+</p-table>

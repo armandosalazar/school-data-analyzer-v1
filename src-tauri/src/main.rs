@@ -15,6 +15,7 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             upload_file,
             get_students,
+            commands::student::count_students,
             count_teachers,
             get_teachers
         ])
