@@ -4,12 +4,17 @@
   <ng-template pTemplate="caption">
     <div class="flex">
       <!--      <input type="text" pInputText class="mr-2" />-->
-      <p-dropdown placeholder="Select a School" class="mr-3" />
+      <p-dropdown
+        placeholder="Select a School"
+        class="mr-3"
+        [disabled]="processing"
+      />
       <p-button
         label="Upload"
         icon="pi pi-upload"
         [rounded]="true"
         (onClick)="uploadFile()"
+        [disabled]="processing"
       />
     </div>
     @if (processing) {

@@ -1,6 +1,8 @@
+mod processor;
+
 pub mod teacher;
 pub mod file;
-mod processor;
+pub mod student;
 
 
 

@@ -1,6 +1,9 @@
 use diesel::prelude::*;
 
-#[derive(Insertable, Queryable, Identifiable)]
+#[derive(Insertable, Queryable, Identifiable, Associations, PartialEq)]
+#[derive(Debug)]
+#[diesel(belongs_to(crate::models::student::Student))]
+#[diesel(belongs_to(crate::models::subject::Subject))]
 #[diesel(table_name = crate::schema::grades)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct Grade {

@@ -262,7 +262,6 @@ pub async fn create_grades(
         }
     }
 
-    println!("{:?}", select_columns);
     let grades = lf
         .clone()
         .lazy()
@@ -271,8 +270,6 @@ pub async fn create_grades(
         .agg(agg_columns)
         .sort(["register"], Default::default())
         .collect()?;
-    println!("{:?}", grades);
-    println!("{:?}", last_column);
 
     let mut repository = crate::repository::grade::GradeRepository::new(conn);
 

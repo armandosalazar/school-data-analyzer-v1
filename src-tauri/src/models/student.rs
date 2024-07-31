@@ -1,9 +1,11 @@
 use diesel::prelude::*;
+use serde::Serialize;
 // use crate::schema::students::speciality_id;
 
-#[derive(Insertable, Queryable)]
+#[derive(Insertable, Queryable, Debug, Identifiable)]
 #[diesel(table_name = crate::schema::students)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
+#[derive(Serialize)]
 pub struct Student {
     pub id: Option<i32>,
     pub speciality_id: Option<i32>,
