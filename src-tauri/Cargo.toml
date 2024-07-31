@@ -14,12 +14,12 @@ tauri-build = { version = "1", features = [] }
 tauri = { version = "1", features = [ "dialog-all", "shell-open"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-diesel = { version = "2.2.1", features = ["sqlite", "chrono", "returning_clauses_for_sqlite_3_35"] }
+diesel = { version = "2.2.2", features = ["sqlite", "chrono", "returning_clauses_for_sqlite_3_35"] }
 chrono = "0.4.38"
 dotenvy = "0.15.7"
 polars = { version = "0.41.3", features = ["lazy"] }
-tokio = { version = "1.39.2", features = ["full"] }
-futures = "0.3.30"
+#rusqlite = "0.31.0"
+sqlx = { version = "0.8.0", features = ["runtime-tokio", "sqlite"] }
 
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!

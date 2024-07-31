@@ -1,21 +1,28 @@
-use diesel::internal::derives::multiconnection::SelectStatementAccessor;
-use diesel::prelude::*;
-use diesel::query_dsl::methods::GroupByDsl;
+use serde::Serialize;
+use sqlx::sqlite::SqlitePool;
 
 #[tauri::command]
-pub fn get_students() {
-    let mut conn = crate::database::establish_connection();
+pub async fn get_students() {
+    get_test().await;
+}
 
-    let result = crate::schema::students::dsl::students
-        .limit(10)
-        .load(&mut conn)
-        .expect("Error loading students");
+#[derive(Debug)]
+#[derive(Serialize)]
+pub struct Student {
+    id: Option<i64>,
+    register: Option<i64>,
+    name: Option<String>,
+}
 
-    let grades = crate::models::grade::Grade::belonging_to(&result)
-        .load::<crate::models::grade::Grade>(&mut conn)
-        .expect("Error loading grades");
+async fn get_test() {
+    let pool = SqlitePool::connect("database.db").await.unwrap();
 
-    println!("{:?}", grades);
+    let students = sqlx::query_as!(
+        Student,
+        r#"SELECT s.id, s.register, s.name FROM students s"#
+    );
 
-    println!("{:?}", result);
+    let students = students.fetch_all(&pool).await.unwrap();
+
+    println!("{:?}", students);
 }
