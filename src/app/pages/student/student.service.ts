@@ -8,7 +8,8 @@ import { invoke } from "@tauri-apps/api";
 export class StudentService {
   constructor() {}
 
-  getStudents(): Observable<any> {
-    return from(invoke<any>("get_students"));
+  getStudents(offset: any): Observable<any> {
+    console.log(offset);
+    return from(invoke<any>("get_students", { offset }));
   }
 }
