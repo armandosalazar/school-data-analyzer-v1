@@ -47,13 +47,13 @@ async fn count_test() -> Result<i64, sqlx::Error> {
 #[serde(rename_all = "camelCase")]
 pub struct Grade {
     id: Option<i64>,
-    first_grade: Option<i64>,
+    first_grade: Option<f64>,
     first_faults: Option<i64>,
     first_weighing: Option<i64>,
-    second_grade: Option<i64>,
+    second_grade: Option<f64>,
     second_faults: Option<i64>,
     second_weighing: Option<i64>,
-    third_grade: Option<i64>,
+    third_grade: Option<f64>,
     third_faults: Option<i64>,
     third_weighing: Option<i64>,
     subject_code: Option<String>,

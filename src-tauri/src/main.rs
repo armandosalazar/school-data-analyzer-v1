@@ -9,6 +9,7 @@ mod database;
 mod models;
 mod repository;
 mod schema;
+mod exp;
 
 fn main() {
     tauri::Builder::default()

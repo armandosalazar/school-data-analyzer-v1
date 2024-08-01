@@ -256,8 +256,26 @@ pub async fn create_grades(
 
     for column in required_columns {
         if column_names.contains(&column) {
-            select_columns.push(col(column).cast(DataType::Int32));
-            agg_columns.push(col(column).unique().first());
+            match column {
+                "calificacion1" => {
+                    select_columns.push(col(column).cast(DataType::Float32));
+                    agg_columns.push(crate::exp::normalize_grades(col(column)).unique().first());
+                }
+                "calificacion2" => {
+                    select_columns.push(col(column).cast(DataType::Float32));
+                    agg_columns.push(crate::exp::normalize_grades(col(column)).unique().first());
+                }
+                "calificacion3" => {
+                    select_columns.push(col(column).cast(DataType::Float32));
+                    agg_columns.push(crate::exp::normalize_grades(col(column)).unique().first());
+                }
+                _ => {
+                    select_columns.push(col(column).cast(DataType::Int32));
+                    agg_columns.push(col(column).unique().first());
+                }
+            }
+            // select_columns.push(col(column).cast(DataType::Int32));
+            // agg_columns.push(col(column).unique().first());
             last_column = column.to_string();
         }
     }
@@ -296,7 +314,7 @@ pub async fn create_grades(
                     id: None,
                     student_id,
                     subject_id,
-                    first_grade: grades.column("calificacion1")?.i32()?.get(i),
+                    first_grade: grades.column("calificacion1")?.f32()?.get(i),
                     second_grade: None,
                     third_grade: None,
                     first_faults: grades.column("faltas1")?.i32()?.get(i),
@@ -333,8 +351,8 @@ pub async fn create_grades(
                     id: None,
                     student_id,
                     subject_id,
-                    first_grade: grades.column("calificacion1")?.i32()?.get(i),
-                    second_grade: grades.column("calificacion2")?.i32()?.get(i),
+                    first_grade: grades.column("calificacion1")?.f32()?.get(i),
+                    second_grade: grades.column("calificacion2")?.f32()?.get(i),
                     third_grade: None,
                     first_faults: grades.column("faltas1")?.i32()?.get(i),
                     second_faults: grades.column("faltas2")?.i32()?.get(i),
@@ -370,9 +388,9 @@ pub async fn create_grades(
                     id: None,
                     student_id,
                     subject_id,
-                    first_grade: grades.column("calificacion1")?.i32()?.get(i),
-                    second_grade: grades.column("calificacion2")?.i32()?.get(i),
-                    third_grade: grades.column("calificacion3")?.i32()?.get(i),
+                    first_grade: grades.column("calificacion1")?.f32()?.get(i),
+                    second_grade: grades.column("calificacion2")?.f32()?.get(i),
+                    third_grade: grades.column("calificacion3")?.f32()?.get(i),
                     first_faults: grades.column("faltas1")?.i32()?.get(i),
                     second_faults: grades.column("faltas2")?.i32()?.get(i),
                     third_faults: grades.column("faltas3")?.i32()?.get(i),
