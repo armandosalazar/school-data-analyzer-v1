@@ -8,11 +8,21 @@ import {
 import _ from "lodash";
 import { ButtonModule } from "primeng/button";
 import { RippleModule } from "primeng/ripple";
+import { TagModule } from "primeng/tag";
+import { AccordionModule } from "primeng/accordion";
+import { NgForOf } from "@angular/common";
 
 @Component({
   selector: "app-student",
   standalone: true,
-  imports: [TableModule, ButtonModule, RippleModule],
+  imports: [
+    TableModule,
+    ButtonModule,
+    RippleModule,
+    TagModule,
+    AccordionModule,
+    NgForOf,
+  ],
   templateUrl: "./student.component.html",
   styleUrl: "./student.component.css",
 })
@@ -55,9 +65,9 @@ export class StudentComponent {
     console.log(event);
     this.studentService
       .getGradesByStudentId(event.data.id)
-      .subscribe((data) => {
-        this.studentGrades = data;
-        console.log(data);
+      .subscribe((grades) => {
+        this.studentGrades = grades;
+        console.log(grades);
       });
   }
 
@@ -69,4 +79,36 @@ export class StudentComponent {
     //   life: 3000,
     // });
   }
+
+  averageAnalyzer(grade: Grade): number[] {
+    let currentAverage = 0;
+    grade.firstGrade &&
+      (currentAverage += (grade.firstGrade * grade.firstWeighing) / 100);
+    grade.secondGrade &&
+      (currentAverage += (grade.secondGrade * grade.secondWeighing) / 100);
+    grade.thirdGrade &&
+      (currentAverage += (grade.thirdGrade * grade.thirdWeighing) / 100);
+
+    if (!grade.thirdGrade) {
+      grade.thirdWeighing = 100 - grade.firstWeighing - grade.secondWeighing;
+      if (currentAverage >= 70) {
+        return [Number(currentAverage.toFixed(2)), 0];
+      }
+      let neededGrade = (70 - currentAverage) / (grade.thirdWeighing / 100);
+      if (neededGrade > 100) {
+        return [
+          Number(currentAverage.toFixed(2)),
+          Number(neededGrade.toFixed(2)),
+        ];
+      }
+      return [
+        Number(currentAverage.toFixed(2)),
+        Number(neededGrade.toFixed(2)),
+      ];
+    }
+
+    return [Number(currentAverage.toFixed(2))];
+  }
+
+  protected readonly Math = Math;
 }

@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use sqlx::{FromRow, query, Row};
+use sqlx::FromRow;
 use sqlx::sqlite::SqlitePool;
 
 

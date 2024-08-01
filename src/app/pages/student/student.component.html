@@ -63,69 +63,138 @@
   <ng-template pTemplate="rowexpansion" let-student>
     <tr>
       <td colspan="4">
-        <p-table
-          [value]="studentGrades"
-          [scrollable]="true"
-          styleClass="p-datatable-sm"
-        >
-          <ng-template pTemplate="header">
-            <tr>
-              <th style="min-width: 100px">Subject Code</th>
-              <th style="min-width: 100px">Subject</th>
-              <th style="min-width: 50px">Grades</th>
-              <th style="min-width: 50px">Weighing</th>
-              <th style="min-width: 50px">Faults</th>
-              <th style="min-width: 100px">Teacher Payroll</th>
-              <th style="min-width: 100px">Teacher Name</th>
-              <th style="min-width: 100px">Division Code</th>
-              <th style="min-width: 100px">Division Name</th>
-            </tr>
-          </ng-template>
-          <ng-template pTemplate="body" let-grade>
-            <tr>
-              <td>{{ grade.subjectCode }}</td>
-              <td>{{ grade.subjectName }}</td>
-              <td>
-                {{ grade.firstGrade?.toFixed(2) }}<br />
-                {{ grade.secondGrade?.toFixed(2) }}<br />
-                {{ grade.thirdGrade?.toFixed(2) }}
-              </td>
-              <td>
-                {{ grade.firstWeighing }}<br />
-                {{ grade.secondWeighing }}<br />
-                {{ grade.thirdWeighing }}
-              </td>
-              <td>
-                {{ grade.firstFaults }}<br />
-                {{ grade.secondFaults }}<br />
-                {{ grade.thirdFaults }}
-              </td>
-              <td>{{ grade.teacherPayroll }}</td>
-              <td>{{ grade.teacherName }}</td>
-              <td>{{ grade.divisionCode }}</td>
-              <td>{{ grade.divisionName }}</td>
-            </tr>
-          </ng-template>
-        </p-table>
+        <p-accordion [multiple]="true">
+          <p-accordionTab header="Grades">
+            <p-table
+              [value]="studentGrades"
+              [scrollable]="true"
+              styleClass="p-datatable-sm"
+            >
+              <ng-template pTemplate="header">
+                <tr>
+                  <th style="min-width: 100px">Subject Code</th>
+                  <th style="min-width: 100px">Subject</th>
+                  <th style="min-width: 50px">Grades</th>
+                  <th style="min-width: 50px">Weighing</th>
+                  <th style="min-width: 50px">Faults</th>
+                  <th style="min-width: 100px">Teacher Payroll</th>
+                  <th style="min-width: 100px">Teacher Name</th>
+                  <th style="min-width: 100px">Division Code</th>
+                  <th style="min-width: 100px">Division Name</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-grade>
+                <tr>
+                  <td>{{ grade.subjectCode }}</td>
+                  <td>{{ grade.subjectName }}</td>
+                  <td>
+                    <span
+                      [class]="
+                        grade.firstGrade < 70
+                          ? 'text-red-500'
+                          : 'text-green-500'
+                      "
+                    >
+                      {{ grade.firstGrade?.toFixed(2) }}
+                    </span>
+                    <span
+                      [class]="
+                        grade.secondGrade < 70
+                          ? 'text-red-500'
+                          : 'text-green-500'
+                      "
+                    >
+                      {{ grade.secondGrade?.toFixed(2) }}
+                    </span>
+                    <span
+                      [class]="
+                        grade.thirdGrade < 70
+                          ? 'text-red-500'
+                          : 'text-green-500'
+                      "
+                    >
+                      {{ grade.thirdGrade?.toFixed(2) }}
+                    </span>
+                  </td>
+                  <td>
+                    {{ grade.firstWeighing }}<br />
+                    {{ grade.secondWeighing }}<br />
+                    {{ grade.thirdWeighing }}
+                  </td>
+                  <td>
+                    {{ grade.firstFaults }}<br />
+                    {{ grade.secondFaults }}<br />
+                    {{ grade.thirdFaults }}
+                  </td>
+                  <td>{{ grade.teacherPayroll }}</td>
+                  <td>{{ grade.teacherName }}</td>
+                  <td>{{ grade.divisionCode }}</td>
+                  <td>{{ grade.divisionName }}</td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </p-accordionTab>
+          <p-accordionTab header="Analysis">
+            <table class="table-fixed border-spacing-2">
+              <thead>
+                <tr>
+                  <th class="border border-slate-200 px-2">Subject</th>
+                  <th class="border border-slate-200 px-2">Average</th>
+                  <th class="border border-slate-200 px-2">Necessary</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let grade of studentGrades">
+                  <td class="border border-slate-200 px-2">
+                    {{ grade.subjectName }}
+                  </td>
+                  <td class="border border-slate-200 px-2">
+                    {{
+                      averageAnalyzer(grade).length == 2
+                        ? averageAnalyzer(grade)[0]
+                        : "Not enough grades"
+                    }}
+                  </td>
+                  <td class="border border-slate-200 px-2">
+                    {{
+                      averageAnalyzer(grade).length == 2
+                        ? averageAnalyzer(grade)[1]
+                        : "Not enough grades"
+                    }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <!--            @for (grade of studentGrades; track grade.id) {-->
+            <!--              @if (averageAnalyzer(grade).length == 2) {-->
+            <!--                <p-->
+            <!--                  [class]="-->
+            <!--                    averageAnalyzer(grade)[1] > 100-->
+            <!--                      ? 'text-red-500'-->
+            <!--                      : 'text-green-500'-->
+            <!--                  "-->
+            <!--                >-->
+            <!--                  <span>-->
+            <!--                    {{ grade.subjectName }}-->
+            <!--                  </span>-->
+            <!--                  <span>-->
+            <!--                    {{ averageAnalyzer(grade)[0] }}-->
+            <!--                  </span>-->
+            <!--                  @if (averageAnalyzer(grade)[1] > 100) {-->
+            <!--                    <span class="text-red-500">-->
+            <!--                      {{ Math.round(averageAnalyzer(grade)[1]) }}-->
+            <!--                    </span>-->
+            <!--                  } @else {-->
+            <!--                    <span class="text-green-500">-->
+            <!--                      {{ Math.round(averageAnalyzer(grade)[1]) }}-->
+            <!--                    </span>-->
+            <!--                  }-->
+            <!--                </p>-->
+            <!--              }-->
+            <!--            }-->
+          </p-accordionTab>
+        </p-accordion>
       </td>
     </tr>
-    <!--        @for (grade of studentGrades; track grade.id) {-->
-    <!--            <div class="p-grid p-dir-col">-->
-    <!--                <div class="p-col">-->
-    <!--                    <b>Id:</b> {{ grade.subject_name }}-->
-    <!--                </div>-->
-    <!--            </div>-->
-    <!--        }-->
-    <!--        <div class="p-grid p-dir-col">-->
-    <!--            <div class="p-col">-->
-    <!--                <b>Id:</b> {{ student.id }}-->
-    <!--            </div>-->
-    <!--            <div class="p-col">-->
-    <!--                <b>Register:</b> {{ student.register }}-->
-    <!--            </div>-->
-    <!--            <div class="p-col">-->
-    <!--                <b>Name:</b> {{ student.name }}-->
-    <!--            </div>-->
-    <!--        </div>-->
   </ng-template>
 </p-table>
