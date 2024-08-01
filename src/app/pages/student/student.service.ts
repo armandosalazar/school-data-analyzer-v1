@@ -6,6 +6,7 @@ export interface Student {
   id: number;
   register: number;
   name: string;
+  type: string;
 }
 
 export interface Grade {
@@ -27,14 +28,30 @@ export interface Grade {
   divisionName: string;
 }
 
+export interface Filter {
+  name: string;
+  value: string;
+  matchMode: string;
+}
+
 @Injectable({
   providedIn: "root",
 })
 export class StudentService {
   constructor() {}
 
-  getStudents(limit: number, offset: number): Observable<Student[]> {
-    return from(invoke<Student[]>("get_students", { limit, offset }));
+  getStudents(
+    limit: number,
+    offset: number,
+    filters: Filter[],
+  ): Observable<Student[]> {
+    return from(
+      invoke<Student[]>("get_students", {
+        limit,
+        offset,
+        filters: JSON.stringify(filters),
+      }),
+    );
   }
 
   countStudents(): Observable<number> {

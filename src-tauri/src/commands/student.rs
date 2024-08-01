@@ -1,9 +1,12 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
+use sqlx::{FromRow, query, Row};
 use sqlx::sqlite::SqlitePool;
 
+
 #[tauri::command]
-pub async fn get_students(limit: Option<i64>, offset: Option<i64>) -> Vec<Student> {
-    get_test(limit.unwrap_or(10), offset.unwrap_or(0)).await.unwrap_or_else(|_| Vec::new())
+pub async fn get_students(limit: Option<i64>, offset: Option<i64>, filters: Option<String>) -> Vec<Student> {
+    println!("{:?}", filters);
+    read_students(limit.unwrap_or(10), offset.unwrap_or(0), filters.unwrap_or("[]".to_string())).await.unwrap_or_else(|_| Vec::new())
 }
 
 #[tauri::command]
@@ -18,6 +21,7 @@ pub async fn get_grades_by_student_id(student_id: i64) -> Vec<Grade> {
 
 #[derive(Debug)]
 #[derive(Serialize)]
+#[derive(FromRow)]
 pub struct Student {
     id: Option<i64>,
     register: Option<i64>,
@@ -26,15 +30,67 @@ pub struct Student {
     type_: Option<String>,
 }
 
-async fn get_test(limit: i64, offset: i64) -> Result<Vec<Student>, sqlx::Error> {
+#[derive(Debug)]
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct Filter {
+    name: Option<String>,
+    value: Option<String>,
+    match_mode: Option<String>,
+}
+async fn read_students(limit: i64, offset: i64, filters: String) -> Result<Vec<Student>, sqlx::Error> {
     let pool = SqlitePool::connect("database.db").await?;
 
-    sqlx::query_as!(
-        Student,
-        r#"SELECT s.id, s.register, s.name, s.`type` AS type_ FROM students s LIMIT ? OFFSET ?"#,
-        limit,
-        offset
-    ).fetch_all(&pool).await
+    let mut query_builder = sqlx::QueryBuilder::new(r#"
+    SELECT s.id, s.register, s.name, s.type as type_
+    FROM students s
+    "#);
+
+    let filters: Vec<Filter> = serde_json::from_str(&filters).unwrap_or_else(|_| Vec::new());
+    let mut where_added = false;
+    for filter in filters {
+        if filter.value.is_some() {
+            if !where_added {
+                query_builder.push(" WHERE ");
+                where_added = true;
+            } else {
+                query_builder.push(" AND ");
+            }
+            match filter.match_mode.unwrap().as_str() {
+                "startsWith" => {
+                    query_builder.push(format!(" s.{} LIKE ", filter.name.unwrap()));
+                    query_builder.push_bind(format!("{}%", filter.value.unwrap()));
+                }
+                "contains" => {
+                    query_builder.push(format!(" s.{} LIKE ", filter.name.unwrap()));
+                    query_builder.push_bind(format!("%{}%", filter.value.unwrap()));
+                }
+                "notContains" => {
+                    query_builder.push(format!(" s.{} NOT LIKE ", filter.name.unwrap()));
+                    query_builder.push_bind(format!("%{}%", filter.value.unwrap()));
+                }
+                "endsWith" => {
+                    query_builder.push(format!(" s.{} LIKE ", filter.name.unwrap()));
+                    query_builder.push_bind(format!("%{}", filter.value.unwrap()));
+                }
+                "equals" => {
+                    query_builder.push(format!(" s.{} = ", filter.name.unwrap()));
+                    query_builder.push_bind(filter.value.unwrap());
+                }
+                _ => {}
+            }
+        }
+    }
+
+    query_builder.push(" LIMIT ").push_bind(limit);
+    query_builder.push(" OFFSET ").push_bind(offset);
+
+    let sql = query_builder.sql();
+    println!("{:?}", sql.to_string());
+
+    let query = query_builder.build_query_as::<Student>();
+
+    query.fetch_all(&pool).await
 }
 
 async fn count_test() -> Result<i64, sqlx::Error> {

@@ -1,5 +1,5 @@
 import { Component, inject } from "@angular/core";
-import { StudentService, Student, Grade } from "./student.service";
+import { StudentService, Student, Grade, Filter } from "./student.service";
 import {
   TableModule,
   TableRowCollapseEvent,
@@ -22,11 +22,26 @@ export class StudentComponent {
   totalRecords: number = 10;
   expandedRows = {};
   studentGrades: Grade[] = [];
+  filters: Filter[] = [];
 
   loadStudents(event: any): void {
     console.log(JSON.stringify(event));
+    if (_.isEqual(event.filters, {}) || _.isEmpty(event.filters)) {
+      this.filters = [];
+    } else {
+      this.filters = Object.keys(event.filters).map((key) => {
+        return {
+          name: key,
+          value: event.filters[key].value,
+          matchMode: event.filters[key].matchMode,
+        };
+      });
+    }
+
+    console.log(this.filters);
+
     this.studentService
-      .getStudents(event.rows, event.first)
+      .getStudents(event.rows, event.first, this.filters)
       .subscribe((students) => {
         this.students = students;
       });

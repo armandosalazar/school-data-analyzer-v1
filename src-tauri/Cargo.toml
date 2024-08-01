@@ -20,6 +20,7 @@ dotenvy = "0.15.7"
 polars = { version = "0.41.3", features = ["lazy"] }
 #rusqlite = "0.31.0"
 sqlx = { version = "0.8.0", features = ["runtime-tokio", "sqlite"] }
+sqlx-conditional-queries = { version = "0.1.4", features = ["sqlite"] }
 
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!

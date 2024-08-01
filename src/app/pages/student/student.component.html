@@ -1,97 +1,131 @@
 <p-table
-        [value]="students"
-        [paginator]="true"
-        [rows]="10"
-        [lazy]="true"
-        (onLazyLoad)="loadStudents($event)"
-        [totalRecords]="totalRecords"
-        [rowsPerPageOptions]="[5, 10, 20]"
-        dataKey="id"
-        rowExpandMode="single"
-        [expandedRowKeys]="expandedRows"
-        (onRowExpand)="onRowExpand($event)"
-        (onRowCollapse)="onRowCollapse($event)"
-        styleClass="p-datatable-sm"
-        [scrollable]="true"
+  [value]="students"
+  [paginator]="true"
+  [rows]="10"
+  [lazy]="true"
+  (onLazyLoad)="loadStudents($event)"
+  [totalRecords]="totalRecords"
+  [rowsPerPageOptions]="[5, 10, 20]"
+  dataKey="id"
+  rowExpandMode="single"
+  [expandedRowKeys]="expandedRows"
+  (onRowExpand)="onRowExpand($event)"
+  (onRowCollapse)="onRowCollapse($event)"
+  styleClass="p-datatable-sm"
+  [scrollable]="true"
 >
-    <ng-template pTemplate="header">
-        <tr>
-            <th></th>
-            <th>Id</th>
-            <th>Register</th>
-            <th>Name</th>
-        </tr>
-    </ng-template>
-    <ng-template pTemplate="body" let-student let-expanded="expanded">
-        <tr>
-            <td>
-                <p-button
-                        type="button"
-                        pRipple [pRowToggler]="student"
-                        [text]="true"
-                        [rounded]="true"
-                        [plain]="true"
-                        [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
-                />
-            </td>
-            <td>{{ student.id }}</td>
-            <td>{{ student.register }}</td>
-            <td>{{ student.name }}</td>
-        </tr>
-    </ng-template>
-    <ng-template pTemplate="rowexpansion" let-student>
-        <tr>
-            <td colspan="4">
-                <p-table [value]="studentGrades"
-                         [scrollable]="true" scrollHeight="400px"
-                         styleClass="p-datatable-sm"
-                >
-                    <ng-template pTemplate="header">
-                        <tr>
-                            <th>Subject Code</th>
-                            <th>Subject</th>
-                            <th style="min-width:100px">Grades</th>
-                            <th style="min-width:100px">Weighing</th>
-                            <th style="min-width:100px">Faults</th>
-                            <th>Teacher Payroll</th>
-                            <th>Teacher Name</th>
-                            <th>Division Code</th>
-                            <th>Division Name</th>
-                        </tr>
-                    </ng-template>
-                    <ng-template pTemplate="body" let-grade>
-                        <tr>
-                            <td>{{ grade.subjectCode }}</td>
-                            <td>{{ grade.subjectName }}</td>
-                            <td>{{ grade.firstGrade }} / {{ grade.secondGrade }} / {{ grade.thirdGrade }}</td>
-                            <td>{{ grade.firstWeighing }} / {{ grade.secondWeighing }} / {{ grade.thirdWeighing }}</td>
-                            <td>{{ grade.firstFaults }} / {{ grade.secondFaults }} / {{ grade.thirdFaults }}</td>
-                            <td>{{ grade.teacherPayroll }}</td>
-                            <td>{{ grade.teacherName }}</td>
-                            <td>{{ grade.divisionCode }}</td>
-                            <td>{{ grade.divisionName }}</td>
-                        </tr>
-                    </ng-template>
-                </p-table>
-            </td>
-        </tr>
-        <!--        @for (grade of studentGrades; track grade.id) {-->
-        <!--            <div class="p-grid p-dir-col">-->
-        <!--                <div class="p-col">-->
-        <!--                    <b>Id:</b> {{ grade.subject_name }}-->
-        <!--                </div>-->
-        <!--            </div>-->
-        <!--        }-->
-        <!--        <div class="p-grid p-dir-col">-->
-        <!--            <div class="p-col">-->
-        <!--                <b>Id:</b> {{ student.id }}-->
-        <!--            </div>-->
-        <!--            <div class="p-col">-->
-        <!--                <b>Register:</b> {{ student.register }}-->
-        <!--            </div>-->
-        <!--            <div class="p-col">-->
-        <!--                <b>Name:</b> {{ student.name }}-->
-        <!--            </div>-->
-        <!--        </div>-->
-    </ng-template>
+  <ng-template pTemplate="header">
+    <tr>
+      <th></th>
+      <!--            <th>Id</th>-->
+      <th>Register</th>
+      <th>Name</th>
+    </tr>
+    <tr>
+      <th></th>
+      <th>
+        <p-columnFilter
+          type="text"
+          field="register"
+          placeholder="Seach by Register"
+          ariaLabel="Filter by Register"
+        />
+      </th>
+      <th>
+        <p-columnFilter
+          type="text"
+          field="name"
+          placeholder="Seach by Name"
+          ariaLabel="Filter by Name"
+        />
+      </th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-student let-expanded="expanded">
+    <tr>
+      <td>
+        <p-button
+          type="button"
+          pRipple
+          [pRowToggler]="student"
+          [text]="true"
+          [rounded]="true"
+          [plain]="true"
+          [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
+          size="small"
+        />
+      </td>
+      <!--            <td>{{ student.id }}</td>-->
+      <td>{{ student.register }}</td>
+      <td>{{ student.name }}</td>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="rowexpansion" let-student>
+    <tr>
+      <td colspan="4">
+        <p-table
+          [value]="studentGrades"
+          [scrollable]="true"
+          styleClass="p-datatable-sm"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th style="min-width: 100px">Subject Code</th>
+              <th style="min-width: 100px">Subject</th>
+              <th style="min-width: 50px">Grades</th>
+              <th style="min-width: 50px">Weighing</th>
+              <th style="min-width: 50px">Faults</th>
+              <th style="min-width: 100px">Teacher Payroll</th>
+              <th style="min-width: 100px">Teacher Name</th>
+              <th style="min-width: 100px">Division Code</th>
+              <th style="min-width: 100px">Division Name</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-grade>
+            <tr>
+              <td>{{ grade.subjectCode }}</td>
+              <td>{{ grade.subjectName }}</td>
+              <td>
+                {{ grade.firstGrade?.toFixed(2) }}<br />
+                {{ grade.secondGrade?.toFixed(2) }}<br />
+                {{ grade.thirdGrade?.toFixed(2) }}
+              </td>
+              <td>
+                {{ grade.firstWeighing }}<br />
+                {{ grade.secondWeighing }}<br />
+                {{ grade.thirdWeighing }}
+              </td>
+              <td>
+                {{ grade.firstFaults }}<br />
+                {{ grade.secondFaults }}<br />
+                {{ grade.thirdFaults }}
+              </td>
+              <td>{{ grade.teacherPayroll }}</td>
+              <td>{{ grade.teacherName }}</td>
+              <td>{{ grade.divisionCode }}</td>
+              <td>{{ grade.divisionName }}</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </td>
+    </tr>
+    <!--        @for (grade of studentGrades; track grade.id) {-->
+    <!--            <div class="p-grid p-dir-col">-->
+    <!--                <div class="p-col">-->
+    <!--                    <b>Id:</b> {{ grade.subject_name }}-->
+    <!--                </div>-->
+    <!--            </div>-->
+    <!--        }-->
+    <!--        <div class="p-grid p-dir-col">-->
+    <!--            <div class="p-col">-->
+    <!--                <b>Id:</b> {{ student.id }}-->
+    <!--            </div>-->
+    <!--            <div class="p-col">-->
+    <!--                <b>Register:</b> {{ student.register }}-->
+    <!--            </div>-->
+    <!--            <div class="p-col">-->
+    <!--                <b>Name:</b> {{ student.name }}-->
+    <!--            </div>-->
+    <!--        </div>-->
+  </ng-template>
 </p-table>
